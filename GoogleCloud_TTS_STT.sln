@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainUI", "MainUI\MainUI.csproj", "{E3019B65-E74C-4273-9B4D-DDE2D1438606}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{3EFE9A42-9F5E-40A7-B966-AA6DD38F39A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleCloud_TTS_STT.Modules.TextToSpeech", "Modules\GoogleCloud_TTS_STT.Modules.TextToSpeech\GoogleCloud_TTS_STT.Modules.TextToSpeech.csproj", "{22AF9119-4356-46C7-B518-360B6AE9054B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleCloud_TTS_STT.Core", "GoogleCloud_TTS_STT.Core\GoogleCloud_TTS_STT.Core.csproj", "{73687433-0D00-4673-AF61-8A1D6F89E18C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleCloud_TTS_STT.Modules.SpeechToText", "Modules\GoogleCloud_TTS_STT.Modules.SpeechToText\GoogleCloud_TTS_STT.Modules.SpeechToText.csproj", "{151B49B8-1439-4ACA-9F9F-3E0E2E4B6D9F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3019B65-E74C-4273-9B4D-DDE2D1438606}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3019B65-E74C-4273-9B4D-DDE2D1438606}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3019B65-E74C-4273-9B4D-DDE2D1438606}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3019B65-E74C-4273-9B4D-DDE2D1438606}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22AF9119-4356-46C7-B518-360B6AE9054B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22AF9119-4356-46C7-B518-360B6AE9054B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22AF9119-4356-46C7-B518-360B6AE9054B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22AF9119-4356-46C7-B518-360B6AE9054B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73687433-0D00-4673-AF61-8A1D6F89E18C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73687433-0D00-4673-AF61-8A1D6F89E18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73687433-0D00-4673-AF61-8A1D6F89E18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73687433-0D00-4673-AF61-8A1D6F89E18C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{151B49B8-1439-4ACA-9F9F-3E0E2E4B6D9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{151B49B8-1439-4ACA-9F9F-3E0E2E4B6D9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{151B49B8-1439-4ACA-9F9F-3E0E2E4B6D9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{151B49B8-1439-4ACA-9F9F-3E0E2E4B6D9F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{22AF9119-4356-46C7-B518-360B6AE9054B} = {3EFE9A42-9F5E-40A7-B966-AA6DD38F39A9}
+		{151B49B8-1439-4ACA-9F9F-3E0E2E4B6D9F} = {3EFE9A42-9F5E-40A7-B966-AA6DD38F39A9}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CAF16412-B2CB-4BCF-B91A-3B255DD1AAB3}
+	EndGlobalSection
+EndGlobal
