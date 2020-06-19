@@ -1,4 +1,5 @@
-﻿using Google.Cloud.TextToSpeech.V1;
+﻿using Google.Api.Gax.Grpc;
+using Google.Cloud.TextToSpeech.V1;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
 using System;
 using System.Collections.Generic;

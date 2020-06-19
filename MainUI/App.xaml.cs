@@ -1,5 +1,4 @@
-﻿
-using GoogleCloud_TTS_STT.Modules.SpeechToText;
+﻿using GoogleCloud_TTS_STT.Modules.SpeechToText;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech;
 using MainUI.Views;
 using Prism.Ioc;
@@ -20,7 +19,6 @@ namespace MainUI
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

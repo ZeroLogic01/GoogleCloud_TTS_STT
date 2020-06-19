@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Helpers\ApiHelper.cs" />
+    <Compile Include="Helpers\ApplicationHelper.cs" />
     <Compile Include="Helpers\LanguageHelper.cs" />
     <Compile Include="Models\OutputAudio.cs" />
     <Compile Include="Models\VoiceType.cs" />
@@ -105,6 +106,8 @@
     </PackageReference>
     <PackageReference Include="Prism.Wpf" Version="7.2.0.1422" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Dialogs\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

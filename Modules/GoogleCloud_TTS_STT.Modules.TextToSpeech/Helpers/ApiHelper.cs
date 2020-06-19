@@ -1,12 +1,16 @@
 ﻿using ControlzEx.Standard;
 using Google.Cloud.TextToSpeech.V1;
+using Google.Protobuf;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
 {
@@ -53,7 +57,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
         /// <summary>
         /// Gets the output audio file extension based on <see cref="AudioEncoding"/>.
         /// </summary>
-        internal static string GetAudioFileExtension(AudioEncoding audioEncoding)
+        internal static string GetFileExtension(AudioEncoding audioEncoding)
         {
             switch (audioEncoding)
             {
@@ -68,17 +72,69 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
             }
         }
 
-        // [START tts_synthesize_text]
+        internal static string GetSaveFileDialogFilter(AudioEncoding audioEncoding)
+        {
+            switch (audioEncoding)
+            {
+                case AudioEncoding.Linear16:
+                    return "Wave file (*.wav)|*.wav";
+                case AudioEncoding.Mp3:
+                    return "Mp3 file (*.mp3)|*.mp3";
+                case AudioEncoding.OggOpus:
+                    return "Ogg/Opus file (*.opus)|*.opus";
+                default:
+                    return audioEncoding.ToString();
+            }
+        }
+
+
+        internal static async Task SynthesizeTextAndSaveToFile(string text, string languageCode, SsmlVoiceGender gender,
+           string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId)
+        {
+            var audioBytes = await SynthesizeText(text, languageCode, gender, voiceName, audioEncoding, speakingRate, pitch, effectProfileId);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = GetSaveFileDialogFilter(audioEncoding)
+            };
+
+            saveFileDialog.FileOk += (object sender, System.ComponentModel.CancelEventArgs e) =>
+            {
+                string fileExtension = GetFileExtension(audioEncoding);
+                if (Path.GetExtension(saveFileDialog.FileName).ToLower() != $".{fileExtension}")
+                {
+                    e.Cancel = true;
+                    MessageBox.Show($"Please omit the extension or use '{fileExtension}'", "Wrong extension", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+            };
+
+            if (saveFileDialog.ShowDialog() == false)
+            {
+                return;
+            }
+
+            using (Stream output = File.Create(saveFileDialog.FileName))
+            {
+                audioBytes.WriteTo(output);
+            }
+
+            try
+            {
+                Process.Start(saveFileDialog.FileName);
+            }
+            catch { }
+
+        }
+
+
         /// <summary>
         /// Creates audio from the text input.
         /// </summary>
-        /// <param name="text">Text to synthesize into audio</param>
-        /// <remarks>
-        /// Generates a file named 'output.mp3' in project folder.
-        /// </remarks>
-        internal static async Task SynthesizeText(string text, string languageCode, SsmlVoiceGender gender,
-            string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, int naturalSampleRateHertz)
+        internal static async Task<ByteString> SynthesizeText(string text, string languageCode, SsmlVoiceGender gender,
+        string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId)
         {
+
             TextToSpeechClient client = await TextToSpeechClient.CreateAsync();
 
             var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
@@ -94,25 +150,25 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
                     SsmlGender = gender,
                     Name = voiceName
                 },
-                AudioConfig = new AudioConfig()
+                AudioConfig = effectProfileId.Equals("Default") ? new AudioConfig()
                 {
                     AudioEncoding = audioEncoding,
                     SpeakingRate = speakingRate,
                     Pitch = pitch
+                } :
+                new AudioConfig()
+                {
+                    AudioEncoding = audioEncoding,
+                    SpeakingRate = speakingRate,
+                    Pitch = pitch,
+                    EffectsProfileId = { effectProfileId }
                 }
             });
 
-            //using (MemoryStream output = new MemoryStream())
-            //{
-            //    response.AudioContent.WriteTo(output);
-            //}
-            using (Stream output = File.Create($"output.{GetAudioFileExtension(audioEncoding)}"))
-            {
-                response.AudioContent.WriteTo(output);
-            }
+            return response.AudioContent;
 
 
         }
-        // [END tts_synthesize_text]
+
     }
 }

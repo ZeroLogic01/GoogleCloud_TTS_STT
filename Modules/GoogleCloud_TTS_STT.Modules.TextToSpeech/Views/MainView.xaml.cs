@@ -1,4 +1,6 @@
-﻿using System;
+﻿using GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels;
+using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +22,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Views
     /// </summary>
     public partial class MainView : UserControl
     {
+
         public MainView()
         {
             InitializeComponent();

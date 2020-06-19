@@ -2,23 +2,32 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        Dialog:DialogParticipation.Register="{Binding}"
         xmlns:core="clr-namespace:GoogleCloud_TTS_STT.Core;assembly=GoogleCloud_TTS_STT.Core"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Title="{Binding Title}" 
+        Icon="pack://application:,,,/GoogleCloud_TTS_STT.Core;component/Resources/logo.ico"
+        ShowIconOnTitleBar="False"
+        Title="{Binding Title}"
+        NonActiveWindowTitleBrush="{DynamicResource MahApps.Brushes.Accent}"
         BorderThickness="0"
         GlowBrush="Black"
         WindowStartupLocation="CenterScreen"
         Height="450" Width="600" MinHeight="450" MinWidth="600">
-    <Grid Margin="6">
+    <Grid Margin="6 6 6 0">
 
-        <Controls:MetroAnimatedSingleRowTabControl 
-            Controls:HeaderedControlHelper.HeaderFontSize="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+        <Controls:MetroAnimatedSingleRowTabControl Grid.Row="0"
+            Controls:HeaderedControlHelper.HeaderFontSize="20" Margin="0 0 0 6">
 
             <!--Google Text to Speech Region-->
             <Controls:MetroTabItem Header="Text to Speech">
                 <ContentControl IsTabStop="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.TextToSpeechRegion}}" 
-                                Margin="8"/>
+                                Margin="8 8 8 0"/>
             </Controls:MetroTabItem>
 
             <!--Google Speech to Text Region-->
@@ -26,5 +35,15 @@
                 <ContentControl IsTabStop="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.SpeechToTextRegion}}" />
             </Controls:MetroTabItem>
         </Controls:MetroAnimatedSingleRowTabControl>
+
+        <Grid Grid.Row="1" Margin="-6 0 -6 0" HorizontalAlignment="Stretch" 
+               Background="{DynamicResource MahApps.Brushes.Accent}">
+
+            <Label Foreground="{DynamicResource MahApps.Brushes.SystemControlHighlightChromeWhite}" Padding="8 0 8 0" VerticalAlignment="Center" BorderThickness="0 0 0 0" BorderBrush="Gray"
+                   Content="{Binding StatusText}"/>
+        </Grid>
+        
+       
+
     </Grid>
 </Controls:MetroWindow>

@@ -1,22 +1,29 @@
 ﻿using Google.Cloud.TextToSpeech.V1;
-using Google.Protobuf.WellKnownTypes;
-using Google.Type;
-using GoogleCloud_TTS_STT.Modules.TextToSpeech.Enums;
+using GoogleCloud_TTS_STT.Core;
+using GoogleCloud_TTS_STT.Core.EventAggregators;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Static;
+using MahApps.Metro.Controls.Dialogs;
+using Microsoft.Win32;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 {
     internal class MainViewModel : BindableBase
     {
+        #region Private fields
+        private readonly IEventAggregator _ea;
+        #endregion
+
         #region Properties
 
         private string _textToSpeech;
@@ -138,6 +145,15 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             set { SetProperty(ref _selectedVoice, value); }
         }
 
+        private Visibility _noInternetConnectionPanelVisibility = Visibility.Collapsed;
+        public Visibility NoInternetConnectionPanelVisibility
+        {
+            get { return _noInternetConnectionPanelVisibility; }
+            set { SetProperty(ref _noInternetConnectionPanelVisibility, value); }
+        }
+
+
+
         #endregion
 
         #region Commands
@@ -146,6 +162,10 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         /// The command to control text to speech
         /// </summary>
         public DelegateCommand TtsCommand { get; set; }
+        public DelegateCommand ReloadComboboxesCommand { get; set; }
+
+
+
 
         #endregion
 
@@ -153,13 +173,27 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         public MainViewModel()
         {
+
+        }
+
+        public MainViewModel(IEventAggregator ea)
+        {
+            _ea = ea;
+
             TtsCommand = new DelegateCommand(PerformTextToSpeech);
+            ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
 
             _selectedAudioProfile = AudioProfiles.FirstOrDefault(x => x.Equals("Default", StringComparison.OrdinalIgnoreCase));
             _selectedAudioFormat = OutputAudioFormats.FirstOrDefault(x => x.AudioEncoding == AudioEncoding.Mp3);
 
+            if (!AppHelper.CheckForInternetConnection())
+            {
+                NoInternetConnectionPanelVisibility = Visibility.Visible;
+            }
             LoadVoiceData().ConfigureAwait(false);
         }
+
+
 
         #endregion
 
@@ -169,34 +203,49 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         private async Task LoadVoiceData()
         {
-            SupportedLangauges = new List<LanguageModel>();
-            Genders = new List<string>();
-            AvailableVoices = await LanguageHelper.GetAvailableVoices();
-
-            foreach (var voice in AvailableVoices)
+            try
             {
-                foreach (var languageCode in voice.LanguageCodes)
+                UpdateApplicationStatus("Fetching supported Languages/Locales list from the api...");
+                AvailableVoices = await LanguageHelper.GetAvailableVoices();
+                SupportedLangauges = new List<LanguageModel>();
+
+                if (NoInternetConnectionPanelVisibility == Visibility.Visible)
                 {
-                    string displayName = ApiHelper.GetLanguageDisplayName(languageCode);
-                    if (!SupportedLangauges.Any(x => x.LanguageCode.Equals(languageCode)))
+                    NoInternetConnectionPanelVisibility = Visibility.Collapsed;
+                }
+
+                foreach (var voice in AvailableVoices)
+                {
+                    foreach (var languageCode in voice.LanguageCodes)
                     {
-                        SupportedLangauges.Add(new LanguageModel { LanguageName = displayName, LanguageCode = languageCode });
+                        string displayName = ApiHelper.GetLanguageDisplayName(languageCode);
+                        if (!SupportedLangauges.Any(x => x.LanguageCode.Equals(languageCode)))
+                        {
+                            SupportedLangauges.Add(new LanguageModel { LanguageName = displayName, LanguageCode = languageCode });
+                        }
                     }
                 }
+                SupportedLangauges = SupportedLangauges.OrderBy(order => order.LanguageName).Distinct().ToList();
+                SelectedLangauge = SupportedLangauges.FirstOrDefault(x => x.LanguageCode.Equals("en-GB"));
+                UpdateApplicationStatus("Ready");
             }
-            SupportedLangauges = SupportedLangauges.OrderBy(order => order.LanguageName).Distinct().ToList();
-            SelectedLangauge = SupportedLangauges.FirstOrDefault(x => x.LanguageCode.Equals("en-GB"));
-
+            catch (Exception ex)
+            {
+                string errorMessage = $"{ExceptionHelper.ExtractExceptionMessage(ex)}";
+                ShowMessage("Error", errorMessage, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary);
+                UpdateApplicationStatus("Failed to fetch supported languages.");
+            }
         }
 
         private void LoadVoiceTypes()
         {
+            UpdateApplicationStatus("Extracting voice types...");
             Genders = new List<string>();
 
             var collection = from m in AvailableVoices
                              select m;
 
-            if (!string.IsNullOrWhiteSpace(SelectedLangauge.LanguageCode))
+            if (!string.IsNullOrWhiteSpace(SelectedLangauge?.LanguageCode))
             {
                 collection = collection.Where(x => x.LanguageCodes.Contains(SelectedLangauge.LanguageCode));
             }
@@ -207,12 +256,13 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         private void LoadVoiceNames()
         {
+            UpdateApplicationStatus("Extracting voice names...");
             VoiceNames = new List<string>();
 
             var collection = from m in AvailableVoices
                              select m;
 
-            if (!string.IsNullOrWhiteSpace(SelectedLangauge.LanguageCode))
+            if (!string.IsNullOrWhiteSpace(SelectedLangauge?.LanguageCode))
             {
                 collection = collection.Where(x => x.LanguageCodes.Contains(SelectedLangauge.LanguageCode));
             }
@@ -228,26 +278,81 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         #endregion
 
+        private void ReloadComboboxes()
+        {
+            UpdateApplicationStatus("Reloading Language/Locale list...");
+            LoadVoiceData().ConfigureAwait(false);
+        }
 
         private async void PerformTextToSpeech()
         {
-            if (string.IsNullOrWhiteSpace(TextToSpeech))
+            if (string.IsNullOrWhiteSpace(TextToSpeech) || SelectedLangauge == null
+                || string.IsNullOrWhiteSpace(SelectedGender) || string.IsNullOrWhiteSpace(SelectedVoice))
             {
                 return;
             }
 
-            SsmlVoiceGender gender = (SsmlVoiceGender)System.Enum.Parse(typeof(SsmlVoiceGender), SelectedGender);
+            try
+            {
+                SsmlVoiceGender gender = (SsmlVoiceGender)Enum.Parse(typeof(SsmlVoiceGender), SelectedGender);
 
-            var naturalSampleRateHertz = AvailableVoices.Where(x => x.Name.Equals(SelectedVoice))
-                .Select(x => x.NaturalSampleRateHertz).FirstOrDefault();
+                await ApiHelper.SynthesizeTextAndSaveToFile(text: TextToSpeech, languageCode: SelectedLangauge.LanguageCode,
+                       gender: gender, voiceName: SelectedVoice, audioEncoding: SelectedAudioFormat.AudioEncoding,
+                       speakingRate: Speed, pitch: Pitch, effectProfileId: SelectedAudioProfile);
 
-            await ApiHelper.SynthesizeText(text: TextToSpeech, languageCode: SelectedLangauge.LanguageCode,
-                gender: gender, voiceName: SelectedVoice, audioEncoding: SelectedAudioFormat.AudioEncoding,
-                speakingRate: Speed, pitch: Pitch, naturalSampleRateHertz: naturalSampleRateHertz);
+                //var naturalSampleRateHertz = AvailableVoices.Where(x => x.Name.Equals(SelectedVoice))
+                //   .Select(x => x.NaturalSampleRateHertz).FirstOrDefault();
 
-            //  throw new NotImplementedException();
+            }
+            catch (Exception e)
+            {
+                ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
+            }
+        }
+
+
+        // Simple method which can be used on a Button
+        public async void ShowMessage(string title, string message, MessageDialogStyle dialogStyle = MessageDialogStyle.Affirmative)
+        {
+            await DialogCoordinator.Instance.ShowMessageAsync(this, title, message, dialogStyle);
+        }
+
+        internal void CopyToFile(MemoryStream input)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = ApiHelper.GetFileExtension(SelectedAudioFormat.AudioEncoding)
+            };
+
+            if (saveFileDialog.ShowDialog() == false)
+            {
+                return;
+            }
+            // It won't matter if we throw an exception during this method;
+            // we don't *really* need to dispose of the MemoryStream, and the
+            // caller should dispose of the input stream
+            Stream ret = File.Create(saveFileDialog.FileName);
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                ret.Write(buffer, 0, bytesRead);
+            }
+            // Rewind ready for reading (typical scenario)
+            ret.Position = 0;
+        }
+
+        public void UpdateApplicationStatus(string message)
+        {
+            _ea.GetEvent<StatusTextEvent>().Publish(
+                new StatusTextEventParameters
+                {
+                    Message = message
+                });
         }
 
         #endregion
     }
+
 }
