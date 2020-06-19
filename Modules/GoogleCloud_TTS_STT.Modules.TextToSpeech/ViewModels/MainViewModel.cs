@@ -4,6 +4,7 @@ using GoogleCloud_TTS_STT.Core.EventAggregators;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Static;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using Microsoft.Win32;
 using Prism.Commands;
@@ -232,7 +233,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             catch (Exception ex)
             {
                 string errorMessage = $"{ExceptionHelper.ExtractExceptionMessage(ex)}";
-                ShowMessage("Error", errorMessage, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary);
+                await ApplicationHelper.ShowMessage("Error", errorMessage, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary);
                 UpdateApplicationStatus("Failed to fetch supported languages.");
             }
         }
@@ -306,16 +307,11 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             }
             catch (Exception e)
             {
-                ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
+                await ApplicationHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
             }
         }
 
 
-        // Simple method which can be used on a Button
-        public async void ShowMessage(string title, string message, MessageDialogStyle dialogStyle = MessageDialogStyle.Affirmative)
-        {
-            await DialogCoordinator.Instance.ShowMessageAsync(this, title, message, dialogStyle);
-        }
 
         internal void CopyToFile(MemoryStream input)
         {
