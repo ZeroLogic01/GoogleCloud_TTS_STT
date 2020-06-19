@@ -1,5 +1,8 @@
-﻿using GoogleCloud_TTS_STT.Modules.SpeechToText;
+﻿using GoogleCloud_TTS_STT.Core;
+using GoogleCloud_TTS_STT.Modules.SpeechToText;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using MainUI.Views;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -28,5 +31,13 @@ namespace MainUI
 
         }
 
+        private async void PrismApplication_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            var message = ExceptionHelper.ExtractExceptionMessage(e.Exception);
+            await DialogManager.ShowMessageAsync(Current.MainWindow as MetroWindow, "An unknown error occurred!",
+                message);
+
+            e.Handled = true;
+        }
     }
 }

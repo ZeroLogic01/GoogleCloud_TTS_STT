@@ -246,7 +246,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             catch (Exception ex)
             {
                 string errorMessage = $"{ExceptionHelper.ExtractExceptionMessage(ex)}";
-                await ApplicationHelper.ShowMessage("Error", errorMessage, MessageDialogStyle.AffirmativeAndNegativeAndSingleAuxiliary);
+                await ApplicationHelper.ShowMessage("Error", errorMessage);
                 UpdateApplicationStatus("Failed to fetch supported languages.");
             }
         }

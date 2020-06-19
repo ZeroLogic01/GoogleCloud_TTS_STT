@@ -39,17 +39,18 @@
         <Grid Grid.Row="0" Visibility="{Binding NoInternetConnectionPanelVisibility}"
                     Background="{DynamicResource MahApps.Brushes.WindowTitle.NonActive}" Margin="0 5">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="24"/>
+                <ColumnDefinition Width="28"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Image Grid.Column="0" Margin="4 0 0 0"
+            <Image Grid.Column="0" Margin="4"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Source="pack://application:,,,/GoogleCloud_TTS_STT.Core;component/Resources/Images/error.png"/>
 
-            <TextBlock Grid.Column="1" Text="No Internet connection" 
-                HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                Height="auto"/>
+            <Label Grid.Column="1" Content="No Internet connection" 
+                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                Foreground="{DynamicResource MahApps.Brushes.SystemControlHighlightChromeWhite}"
+               />
 
         </Grid>
 

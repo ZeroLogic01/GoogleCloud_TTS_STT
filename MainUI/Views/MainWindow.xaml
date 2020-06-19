@@ -15,6 +15,27 @@
         GlowBrush="Black"
         WindowStartupLocation="CenterScreen"
         Height="450" Width="600" MinHeight="450" MinWidth="600">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Click="SetEnvironmentVariable" Content="Set Environment Variable"
+                    ToolTip="Set the environment variable GOOGLE_APPLICATION_CREDENTIALS to the path of the JSON file that contains your service account key.">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Controls:FontIcon Width="22"
+                                        Height="22"
+                                        VerticalAlignment="Center"
+                                         />
+                            <TextBlock Margin="4 0 0 0"
+                         VerticalAlignment="Center"
+                         Text="{Binding}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+
     <Grid Margin="6 6 6 0">
 
         <Grid.RowDefinitions>
