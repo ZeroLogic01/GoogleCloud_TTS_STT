@@ -32,6 +32,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
 
@@ -46,24 +47,27 @@
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Source="pack://application:,,,/GoogleCloud_TTS_STT.Core;component/Resources/Images/error.png"/>
 
-            <Label Grid.Column="1" Content="No Internet connection" 
+            <TextBlock Grid.Column="1" Text="No Internet connection" 
                 HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                Foreground="{DynamicResource MahApps.Brushes.SystemControlHighlightChromeWhite}" 
                 Height="auto"/>
 
         </Grid>
 
         <TextBox Controls:TextBoxHelper.Watermark="Text to speech"
                  Controls:TextBoxHelper.UseFloatingWatermark="True"
-                 TextWrapping="Wrap" FlowDirection="LeftToRight"
+                 TextWrapping="Wrap" FlowDirection="LeftToRight" MaxLength="5000"
                  Grid.Row="1" 
-                 Text="{Binding TextToSpeech,Mode=OneWayToSource,UpdateSourceTrigger=LostFocus}"
+                 Text="{Binding TextToSpeech,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged}"
                  AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Auto" Margin="0 0 0 10"/>
+                 VerticalScrollBarVisibility="Auto"/>
+        
+        <Label Grid.Row="2" Content="Maximum number of characters allowed: 5000" 
+               Foreground="{DynamicResource MahApps.Brushes.Gray3}"
+                HorizontalAlignment="Right" VerticalAlignment="Center" 
+                FontSize="11" Margin="0 0 0 10"/>
 
 
-
-        <Grid Grid.Row="2" Margin="0 5">
+        <Grid Grid.Row="3" Margin="0 5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
@@ -103,7 +107,7 @@
         </Grid>
 
 
-        <Grid Grid.Row="3" Margin="0 5">
+        <Grid Grid.Row="4" Margin="0 5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -134,7 +138,7 @@
         </Grid>
 
 
-        <Grid Grid.Row="4" Margin="0 5">
+        <Grid Grid.Row="5" Margin="0 5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -162,8 +166,8 @@
         </Grid>
 
 
-        <Button Content="{Binding ButtonContent}" Command="{Binding TtsCommand}" 
-                Grid.Row="5" HorizontalAlignment="Right" Width="120"/>
+        <Button Grid.Row="6" Content="{Binding ButtonContent}" Command="{Binding TtsCommand}" 
+               IsEnabled="{Binding IsTextToSpeechButtonEnabled}" HorizontalAlignment="Right" Width="120"/>
 
     </Grid>
 </UserControl>

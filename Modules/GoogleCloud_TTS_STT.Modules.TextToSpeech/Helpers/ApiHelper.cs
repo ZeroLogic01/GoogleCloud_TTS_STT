@@ -1,14 +1,10 @@
-﻿using ControlzEx.Standard;
-using Google.Cloud.TextToSpeech.V1;
+﻿using Google.Cloud.TextToSpeech.V1;
 using Google.Protobuf;
 using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -137,7 +133,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
 
             TextToSpeechClient client = await TextToSpeechClient.CreateAsync();
 
-            var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
+            var response = await client.SynthesizeSpeechAsync(new SynthesizeSpeechRequest
             {
                 Input = new SynthesisInput
                 {

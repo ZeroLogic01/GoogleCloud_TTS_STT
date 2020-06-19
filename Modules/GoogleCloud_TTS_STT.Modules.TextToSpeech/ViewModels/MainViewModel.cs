@@ -4,15 +4,12 @@ using GoogleCloud_TTS_STT.Core.EventAggregators;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Static;
-using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
-using Microsoft.Win32;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,10 +25,26 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         #region Properties
 
         private string _textToSpeech;
+
+        /// <summary>
+        /// The text to be converted to speech
+        /// </summary>
         public string TextToSpeech
         {
             get { return _textToSpeech; }
-            set { SetProperty(ref _textToSpeech, value); }
+            set
+            {
+                SetProperty(ref _textToSpeech, value);
+                IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(value);
+                TtsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private bool _isTextToSpeechButtonEnabled = false;
+        public bool IsTextToSpeechButtonEnabled
+        {
+            get { return _isTextToSpeechButtonEnabled; }
+            set { SetProperty(ref _isTextToSpeechButtonEnabled, value); }
         }
 
         /// <summary>
@@ -43,7 +56,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             get { return _buttonContent; }
             set { SetProperty(ref _buttonContent, value); }
         }
-
 
         private float _speed = 1.00f;
         public float Speed
@@ -165,9 +177,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         public DelegateCommand TtsCommand { get; set; }
         public DelegateCommand ReloadComboboxesCommand { get; set; }
 
-
-
-
         #endregion
 
         #region Constructor
@@ -181,7 +190,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         {
             _ea = ea;
 
-            TtsCommand = new DelegateCommand(PerformTextToSpeech);
+            TtsCommand = new DelegateCommand(PerformTextToSpeech, CanTextToSpeech);
             ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
 
             _selectedAudioProfile = AudioProfiles.FirstOrDefault(x => x.Equals("Default", StringComparison.OrdinalIgnoreCase));
@@ -194,7 +203,11 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             LoadVoiceData().ConfigureAwait(false);
         }
 
-
+        private bool CanTextToSpeech()
+        {
+            return IsTextToSpeechButtonEnabled && !string.IsNullOrWhiteSpace(TextToSpeech) && SelectedLangauge != null
+                   && !string.IsNullOrWhiteSpace(SelectedGender) && !string.IsNullOrWhiteSpace(SelectedVoice);
+        }
 
         #endregion
 
@@ -240,7 +253,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         private void LoadVoiceTypes()
         {
-            UpdateApplicationStatus("Extracting voice types...");
             Genders = new List<string>();
 
             var collection = from m in AvailableVoices
@@ -257,7 +269,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         private void LoadVoiceNames()
         {
-            UpdateApplicationStatus("Extracting voice names...");
             VoiceNames = new List<string>();
 
             var collection = from m in AvailableVoices
@@ -279,6 +290,8 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         #endregion
 
+        #region Commands implementation methods
+
         private void ReloadComboboxes()
         {
             UpdateApplicationStatus("Reloading Language/Locale list...");
@@ -287,14 +300,12 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         private async void PerformTextToSpeech()
         {
-            if (string.IsNullOrWhiteSpace(TextToSpeech) || SelectedLangauge == null
-                || string.IsNullOrWhiteSpace(SelectedGender) || string.IsNullOrWhiteSpace(SelectedVoice))
-            {
-                return;
-            }
+            IsTextToSpeechButtonEnabled = false;
+            TtsCommand.RaiseCanExecuteChanged();
 
             try
             {
+                UpdateApplicationStatus("Performing text to speech");
                 SsmlVoiceGender gender = (SsmlVoiceGender)Enum.Parse(typeof(SsmlVoiceGender), SelectedGender);
 
                 await ApiHelper.SynthesizeTextAndSaveToFile(text: TextToSpeech, languageCode: SelectedLangauge.LanguageCode,
@@ -303,41 +314,18 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
                 //var naturalSampleRateHertz = AvailableVoices.Where(x => x.Name.Equals(SelectedVoice))
                 //   .Select(x => x.NaturalSampleRateHertz).FirstOrDefault();
-
+                UpdateApplicationStatus("Done");
             }
             catch (Exception e)
             {
                 await ApplicationHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
             }
+
+            IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(TextToSpeech);
+            TtsCommand.RaiseCanExecuteChanged();
         }
 
-
-
-        internal void CopyToFile(MemoryStream input)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = ApiHelper.GetFileExtension(SelectedAudioFormat.AudioEncoding)
-            };
-
-            if (saveFileDialog.ShowDialog() == false)
-            {
-                return;
-            }
-            // It won't matter if we throw an exception during this method;
-            // we don't *really* need to dispose of the MemoryStream, and the
-            // caller should dispose of the input stream
-            Stream ret = File.Create(saveFileDialog.FileName);
-
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-            while ((bytesRead = input.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                ret.Write(buffer, 0, bytesRead);
-            }
-            // Rewind ready for reading (typical scenario)
-            ret.Position = 0;
-        }
+        #endregion
 
         public void UpdateApplicationStatus(string message)
         {
