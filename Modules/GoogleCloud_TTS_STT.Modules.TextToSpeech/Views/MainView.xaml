@@ -33,7 +33,8 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="29"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0" Visibility="{Binding NoInternetConnectionPanelVisibility}"
@@ -168,7 +169,17 @@
 
 
         <Button Grid.Row="6" Content="{Binding ButtonContent}" Command="{Binding TtsCommand}" 
-               IsEnabled="{Binding IsTextToSpeechButtonEnabled}" HorizontalAlignment="Right" Width="120"/>
+               IsEnabled="{Binding IsTextToSpeechButtonEnabled}" 
+                HorizontalAlignment="Right" Width="120"
+                Margin="0 5"/>
+
+
+        <Grid Grid.Row="7" Margin="-14 5 -14 0" HorizontalAlignment="Stretch" 
+               Background="{DynamicResource MahApps.Brushes.Accent}">
+
+            <Label Foreground="{DynamicResource MahApps.Brushes.SystemControlHighlightChromeWhite}" Padding="8 0 8 0" VerticalAlignment="Center" BorderThickness="0 0 0 0" BorderBrush="Gray"
+                   Content="{Binding StatusText}"/>
+        </Grid>
 
     </Grid>
 </UserControl>

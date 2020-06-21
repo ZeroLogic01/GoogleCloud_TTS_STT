@@ -18,10 +18,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 {
     internal class MainViewModel : BindableBase
     {
-        #region Private fields
-        private readonly IEventAggregator _ea;
-        #endregion
-
         #region Properties
 
         private string _textToSpeech;
@@ -165,6 +161,19 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             set { SetProperty(ref _noInternetConnectionPanelVisibility, value); }
         }
 
+        #region Status Text
+
+
+
+        private string _statusText = string.Empty;
+        public string StatusText
+        {
+            get { return _statusText; }
+            set { SetProperty(ref _statusText, value); }
+        }
+
+
+        #endregion
 
 
         #endregion
@@ -183,12 +192,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         public MainViewModel()
         {
-
-        }
-
-        public MainViewModel(IEventAggregator ea)
-        {
-            _ea = ea;
 
             TtsCommand = new DelegateCommand(PerformTextToSpeech, CanTextToSpeech);
             ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
@@ -219,7 +222,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         {
             try
             {
-                UpdateApplicationStatus("Fetching supported Languages/Locales list from the api...");
+                await UpdateApplicationStatus("Fetching supported Languages/Locales list from the api...", .5);
                 AvailableVoices = await LanguageHelper.GetAvailableVoices();
                 SupportedLangauges = new List<LanguageModel>();
 
@@ -241,13 +244,13 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
                 }
                 SupportedLangauges = SupportedLangauges.OrderBy(order => order.LanguageName).Distinct().ToList();
                 SelectedLangauge = SupportedLangauges.FirstOrDefault(x => x.LanguageCode.Equals("en-GB"));
-                UpdateApplicationStatus("Ready");
+                await UpdateApplicationStatus("Ready", .5);
             }
             catch (Exception ex)
             {
                 string errorMessage = $"{ExceptionHelper.ExtractExceptionMessage(ex)}";
-                await ApplicationHelper.ShowMessage("Error", errorMessage);
-                UpdateApplicationStatus("Failed to fetch supported languages.");
+                await AppHelper.ShowMessage("Error", errorMessage);
+                await UpdateApplicationStatus("Failed to fetch supported languages.", .5);
             }
         }
 
@@ -305,7 +308,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
             try
             {
-                UpdateApplicationStatus("Performing text to speech");
+                await UpdateApplicationStatus("Performing text to speech");
                 SsmlVoiceGender gender = (SsmlVoiceGender)Enum.Parse(typeof(SsmlVoiceGender), SelectedGender);
 
                 await ApiHelper.SynthesizeTextAndSaveToFile(text: TextToSpeech, languageCode: SelectedLangauge.LanguageCode,
@@ -314,11 +317,11 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
                 //var naturalSampleRateHertz = AvailableVoices.Where(x => x.Name.Equals(SelectedVoice))
                 //   .Select(x => x.NaturalSampleRateHertz).FirstOrDefault();
-                UpdateApplicationStatus("Done");
+                await UpdateApplicationStatus("Done");
             }
             catch (Exception e)
             {
-                await ApplicationHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
+                await AppHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
             }
 
             IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(TextToSpeech);
@@ -327,13 +330,10 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         #endregion
 
-        public void UpdateApplicationStatus(string message)
+        public async Task UpdateApplicationStatus(string message, double delayInSeconds = 0)
         {
-            _ea.GetEvent<StatusTextEvent>().Publish(
-                new StatusTextEventParameters
-                {
-                    Message = message
-                });
+            await Task.Delay(TimeSpan.FromSeconds(delayInSeconds));
+            StatusText = message;
         }
 
         #endregion
