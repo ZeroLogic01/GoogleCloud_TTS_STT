@@ -11,7 +11,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText
         public void OnInitialized(IContainerProvider containerProvider)
         {
             IRegionManager regionManager = containerProvider.Resolve<IRegionManager>();
-            regionManager.Regions[RegionNames.SpeechToTextRegion].Add(containerProvider.Resolve<ViewA>());
+            regionManager.Regions[RegionNames.SpeechToTextRegion].Add(containerProvider.Resolve<SpeechToTextView>());
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)

@@ -91,7 +91,6 @@
   <ItemGroup>
     <Compile Include="Enums\Gender.cs" />
     <Compile Include="Helpers\ApiHelper.cs" />
-    <Compile Include="Helpers\ApplicationHelper.cs" />
     <Compile Include="Helpers\LanguageHelper.cs" />
     <Compile Include="Models\OutputAudio.cs" />
     <Compile Include="Models\VoiceType.cs" />
