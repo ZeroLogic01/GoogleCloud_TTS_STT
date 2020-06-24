@@ -7,11 +7,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Google Speech Services")]
-[assembly: AssemblyDescription("Google Text to speech & Speech to text.")]
+[assembly: AssemblyTitle("Balconette’s Speech Services")]
+[assembly: AssemblyDescription("Balconette’s Text to speech & Speech to text.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ZeroLogic")]
-[assembly: AssemblyProduct("Google TTS & STT")]
+[assembly: AssemblyProduct("Balconette’s TTS & STT")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

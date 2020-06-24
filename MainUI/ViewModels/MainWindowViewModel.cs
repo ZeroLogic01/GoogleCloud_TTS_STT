@@ -8,7 +8,7 @@ namespace MainUI.ViewModels
 {
     public class MainWindowViewModel : BindableBase
     {
-        private string _title = "Google Speech Services";
+        private string _title = "Balconette’s Speech Services";
         public string Title
         {
             get { return _title; }
@@ -25,16 +25,5 @@ namespace MainUI.ViewModels
         public MainWindowViewModel()
         {
         }
-
-        public MainWindowViewModel(IEventAggregator ea)
-        {
-            ea.GetEvent<StatusTextEvent>().Subscribe(MessageReceived, ThreadOption.PublisherThread, false);
-        }
-
-        private void MessageReceived(StatusTextEventParameters status)
-        {
-            StatusText = status.Message;
-        }
-
     }
 }
