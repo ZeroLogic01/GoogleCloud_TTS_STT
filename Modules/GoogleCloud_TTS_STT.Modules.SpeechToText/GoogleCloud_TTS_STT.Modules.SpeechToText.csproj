@@ -89,7 +89,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Converters\InverseBooleanConverter.cs" />
+    <Compile Include="Core\EventAggregators\StatusEvent.cs" />
+    <Compile Include="Core\EventAggregators\StatusEventParameters.cs" />
     <Compile Include="Core\Regions\RegionNames.cs" />
     <Compile Include="Helpers\LanguageHelper.cs" />
     <Compile Include="Helpers\ModuleHelper.cs" />
@@ -163,6 +164,7 @@
     <PackageReference Include="Prism.Wpf" Version="7.2.0.1422" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Converters\" />
     <Folder Include="Core\Enums\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

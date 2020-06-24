@@ -1,8 +1,10 @@
 ﻿using GoogleCloud_TTS_STT.Core;
+using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.EventAggregators;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Models;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Views;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 using System;
@@ -29,11 +31,17 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             set { SetProperty(ref _transcribedText, value); }
         }
 
-      
+        private string _statusText = string.Empty;
+        public string StatusText
+        {
+            get { return _statusText; }
+            set { SetProperty(ref _statusText, value); }
+        }
 
-        //public TranscriptionSettingsViewModel TranscriptionSettingsVM { get; set; }
 
         #endregion
+
+
 
         #region Private Properties
 
@@ -51,17 +59,20 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         }
 
-        public SpeechToTextViewModel(IRegionManager regionManager)
+        public SpeechToTextViewModel(IEventAggregator ea)
         {
-            _regionManager = regionManager;
-            _cts = new CancellationTokenSource();
-
-            //TranscriptionSettingsVM = new TranscriptionSettingsViewModel();
-
-           
+            ea.GetEvent<StatusEvent>().Subscribe(UpdateStatusText, ThreadOption.PublisherThread, false);
         }
 
 
+
+        #region Methods
+        public void UpdateStatusText(StatusEventParameters status)
+        {
+            StatusText = status.Message;
+        }
+
+        #endregion
 
     }
 }

@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:converters="clr-namespace:GoogleCloud_TTS_STT.Modules.SpeechToText.Converters"
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True" 
@@ -22,10 +21,9 @@
     <Grid>
         <Grid.Resources>
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
-            <converters:InverseBooleanConverter x:Key="BoolToVisInverse" />
         </Grid.Resources>
         <Grid.RowDefinitions>
-            <RowDefinition Height="150"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
 
@@ -46,35 +44,32 @@
                                    HorizontalAlignment="Right"
                                    OnContent="Local Computer"
                                    OffContent="Cloud Storage"
-                                   IsOn="{Binding Path=IsLocalStorage}">
+                                   IsOn="{Binding Path=IsLocalStorageEnabled}">
             </Controls:ToggleSwitch>
 
             <TextBox Controls:TextBoxHelper.Watermark="Source audio/video file"
                      Controls:TextBoxHelper.UseFloatingWatermark="True"
                      Controls:TextBoxHelper.WatermarkAlignment="Center"
                      IsReadOnly="True"
-                     Grid.Column="0" Grid.Row="0" Margin="0 0 5 0"
+                     Grid.Column="0" Grid.Row="0" Margin="0 0 5 0" Height="40"
                      Text="{Binding  Path=SourceFile,UpdateSourceTrigger=PropertyChanged}"
-                    IsTabStop="False"
-                      Visibility="{Binding Path=IsLocalStorage, Converter={StaticResource BoolToVis}}"/>
+                     IsTabStop="False"
+                     Visibility="{Binding Path=IsLocalStorageEnabled, Converter={StaticResource BoolToVis}}"/>
 
             <Button Content="..." Command="{Binding ChooseFileCommand}" 
                      HorizontalAlignment="Stretch" 
                      VerticalContentAlignment="Center"
-                     Margin="0 0 0 0"
+                     Margin="0 0 0 0" Height="40"
                      Grid.Column="1" Grid.Row="0" 
-                     Visibility="{Binding Path=IsLocalStorage, Converter={StaticResource BoolToVis}}"
+                     Visibility="{Binding Path=IsLocalStorageEnabled, Converter={StaticResource BoolToVis}}"
                     />
 
             <TextBox Controls:TextBoxHelper.Watermark="Cloud storage URI"
                      Controls:TextBoxHelper.UseFloatingWatermark="True"
-                     Controls:TextBoxHelper.WatermarkAlignment="Center"
-                     IsReadOnly="True"
                      Grid.Column="0" Grid.ColumnSpan="2"
-                     Grid.Row="1" Margin="0 0 0 0"
-                     Text="{Binding  Path=SourceFile,UpdateSourceTrigger=PropertyChanged}"
-                     IsTabStop="False"
-                     Visibility="{Binding Path=IsLocalStorage, Converter={StaticResource BoolToVisInverse}}"/>
+                     Grid.Row="1" Margin="0 0 0 0" Height="40"
+                     Text="{Binding  Path=SourceFileURI,UpdateSourceTrigger=PropertyChanged,Mode=OneWayToSource}"
+                     Visibility="{Binding Path=IsCloudStorageEnabled, Converter={StaticResource BoolToVis}}"/>
 
         </Grid>
 
@@ -84,7 +79,7 @@
 
             <Button  Content="Cancel" Command="{Binding CancelSpeechToTextCommand}" 
                      IsEnabled="{Binding IsCancelButtonEnabled}" 
-                     Visibility="{Binding IsCancelButtonVisisble}"
+                     Visibility="{Binding Path=IsCancelButtonEnabled, Converter={StaticResource BoolToVis}}"
                      HorizontalAlignment="Right" Width="120"
                      Margin="5"/>
 

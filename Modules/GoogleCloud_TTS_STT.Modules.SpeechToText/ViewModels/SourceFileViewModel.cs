@@ -1,7 +1,9 @@
 ﻿using GoogleCloud_TTS_STT.Core;
+using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.EventAggregators;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Views;
 using Microsoft.Win32;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
 using System;
@@ -24,10 +26,26 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             set
             {
                 SetProperty(ref _sourceFile, value);
-
-                IsTranscribeButtonEnabled = !string.IsNullOrWhiteSpace(value);
                 TranscribeCommand.RaiseCanExecuteChanged();
             }
+        }
+
+        private Uri _sourceFileURI;
+        public Uri SourceFileURI
+        {
+            get { return _sourceFileURI; }
+            set
+            {
+                SetProperty(ref _sourceFileURI, value);
+                TranscribeCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private bool _isTranscriptionJobRunning = false;
+        public bool IsTranscriptionJobRunning
+        {
+            get { return _isTranscriptionJobRunning; }
+            set { SetProperty(ref _isTranscriptionJobRunning, value); }
         }
 
         #region Speech to text button
@@ -39,29 +57,9 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             set
             {
                 SetProperty(ref _isTranscribeButtonEnabled, value);
-
-                IsCancelButtonEnabled = !_isTranscribeButtonEnabled;
-                IsCancelButtonVisisble = _isTranscribeButtonEnabled ? Visibility.Collapsed : Visibility.Visible;
                 CancelSpeechToTextCommand.RaiseCanExecuteChanged();
             }
         }
-
-        private bool _isLocalStorage = true;
-
-        public bool IsLocalStorage
-        {
-            get { return _isLocalStorage; }
-            set { SetProperty(ref _isLocalStorage, value); }
-        }
-
-
-        private Visibility _isTranscribeButtonVisible = Visibility.Collapsed;
-        public Visibility IsTranscribeButtonVisible
-        {
-            get { return _isTranscribeButtonVisible; }
-            set { SetProperty(ref _isTranscribeButtonVisible, value); }
-        }
-
 
         #endregion
 
@@ -77,12 +75,30 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             }
         }
 
-        private Visibility _isCancelButtonVisisble = Visibility.Collapsed;
-        public Visibility IsCancelButtonVisisble
+        #endregion
+
+        #region File to choose from
+
+        private bool _isLocalStorageEnabled = true;
+        public bool IsLocalStorageEnabled
         {
-            get { return _isCancelButtonVisisble; }
-            set { SetProperty(ref _isCancelButtonVisisble, value); }
+            get { return _isLocalStorageEnabled; }
+            set
+            {
+                SetProperty(ref _isLocalStorageEnabled, value);
+                IsCloudStorageEnabled = !value;
+
+                TranscribeCommand.RaiseCanExecuteChanged();
+            }
         }
+
+        private bool _isCloudStorageEnabled;
+        public bool IsCloudStorageEnabled
+        {
+            get { return _isCloudStorageEnabled; }
+            set { SetProperty(ref _isCloudStorageEnabled, value); }
+        }
+
 
         #endregion
 
@@ -103,6 +119,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
         #region Private Properties
 
         private readonly IRegionManager _regionManager;
+        private readonly IEventAggregator _ea;
         private CancellationTokenSource _cts;
 
         #endregion
@@ -128,10 +145,13 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
         #endregion
 
 
-        public SourceFileViewModel(IRegionManager regionManager)
+        public SourceFileViewModel(IRegionManager regionManager, IEventAggregator ea)
         {
             _regionManager = regionManager;
+            _ea = ea;
             _cts = new CancellationTokenSource();
+
+            IsCloudStorageEnabled = !IsLocalStorageEnabled;
 
             ChooseFileCommand = new DelegateCommand(ChooseSourceFile);
             NavigateCommand = new DelegateCommand(ActivateTranscriptionSettingsView);
@@ -168,33 +188,44 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         private async void PerformSpeechToText()
         {
-            IsTranscribeButtonEnabled = false;
+            IsTranscriptionJobRunning = true;
             IsNavigateCommandVisisble = Visibility.Collapsed;
             TranscribeCommand.RaiseCanExecuteChanged();
-
+            CancelSpeechToTextCommand.RaiseCanExecuteChanged();
 
             try
             {
-                Console.WriteLine("Performing Speech to Text (Message)");
+                await UpdateStatus("Performing Speech to Text...");
 
+                await Task.Delay(3000, _cts.Token);
 
-
-
-
-                await Task.Delay(10000, _cts.Token);
+                await UpdateStatus("Transcription completed", 1);
+                await UpdateStatus("");
             }
             catch (TaskCanceledException) { }
             catch (Exception e)
             {
                 await AppHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
             }
-
-            IsTranscribeButtonEnabled = true;
-            TranscribeCommand.RaiseCanExecuteChanged();
+            finally
+            {
+                IsTranscriptionJobRunning = false;
+                IsNavigateCommandVisisble = Visibility.Visible;
+                TranscribeCommand.RaiseCanExecuteChanged();
+                CancelSpeechToTextCommand.RaiseCanExecuteChanged();
+            }
         }
 
         private bool CanPerformSpeechToText()
         {
+            if (IsLocalStorageEnabled)
+            {
+                IsTranscribeButtonEnabled = !string.IsNullOrWhiteSpace(SourceFile) && !IsTranscriptionJobRunning;
+            }
+            else
+            {
+                IsTranscribeButtonEnabled = !string.IsNullOrWhiteSpace(SourceFileURI.ToString()) && !IsTranscriptionJobRunning;
+            }
             return IsTranscribeButtonEnabled;
         }
 
@@ -224,15 +255,25 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                 _cts = new CancellationTokenSource(); // "Reset" the cancellation token source...
 
                 IsNavigateCommandVisisble = Visibility.Visible;
-                IsCancelButtonVisisble = Visibility.Collapsed;
+                IsTranscriptionJobRunning = false;
             }
         }
         private bool CanCancelSpeechToText()
         {
-            return !IsTranscribeButtonEnabled;
+            return IsCancelButtonEnabled = !IsTranscribeButtonEnabled && IsTranscriptionJobRunning;
         }
 
         #endregion
+
+        private async Task UpdateStatus(string message, int delayInSeconds = 0)
+        {
+            _ea.GetEvent<StatusEvent>().Publish(
+                new StatusEventParameters
+                {
+                    Message = message
+                });
+            await Task.Delay(TimeSpan.FromSeconds(delayInSeconds));
+        }
 
         #endregion
 
