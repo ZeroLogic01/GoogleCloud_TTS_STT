@@ -7,14 +7,24 @@
         xmlns:core="clr-namespace:GoogleCloud_TTS_STT.Core;assembly=GoogleCloud_TTS_STT.Core"
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
-        Icon="pack://application:,,,/GoogleCloud_TTS_STT.Core;component/Resources/logo.ico"
-        ShowIconOnTitleBar="False"
         Title="{Binding Title}"
         NonActiveWindowTitleBrush="{DynamicResource MahApps.Brushes.Accent}"
         BorderThickness="0"
         GlowBrush="Black"
         WindowStartupLocation="CenterScreen"
         Height="450" Width="600" MinHeight="450" MinWidth="600">
+    <Controls:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <Grid Width="{TemplateBinding Width}"
+                 Height="{TemplateBinding Height}"
+                 Margin="4"
+                 Background="Transparent"
+                 RenderOptions.EdgeMode="Aliased"
+                 RenderOptions.BitmapScalingMode="HighQuality">
+                <Image Source="pack://application:,,,/favicon.ico"></Image>
+            </Grid>
+        </DataTemplate>
+    </Controls:MetroWindow.IconTemplate>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Click="SetEnvironmentVariable" Content="Set Environment Variable"
@@ -52,7 +62,7 @@
 
 
             <!--Google Speech to Text Region-->
-            <Controls:MetroTabItem Header="Speech to Text" >
+            <Controls:MetroTabItem Header="Speech to Text" IsSelected="True">
                 <ContentControl IsTabStop="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.SpeechToTextRegion}}"
                                  Margin="8 8 8 0"/>
             </Controls:MetroTabItem>

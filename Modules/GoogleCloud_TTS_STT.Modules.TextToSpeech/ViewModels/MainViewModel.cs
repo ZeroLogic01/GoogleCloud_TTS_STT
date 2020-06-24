@@ -222,7 +222,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         {
             try
             {
-                await UpdateApplicationStatus("Fetching supported Languages/Locales list from the api...", .5);
+                await UpdateApplicationStatus("Fetching supported Languages/Locales list from the api...");
                 AvailableVoices = await LanguageHelper.GetAvailableVoices();
                 SupportedLangauges = new List<LanguageModel>();
 
@@ -308,7 +308,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
             try
             {
-                await UpdateApplicationStatus("Performing text to speech");
+                await UpdateApplicationStatus("Performing text to speech", .5);
                 SsmlVoiceGender gender = (SsmlVoiceGender)Enum.Parse(typeof(SsmlVoiceGender), SelectedGender);
 
                 await ApiHelper.SynthesizeTextAndSaveToFile(text: TextToSpeech, languageCode: SelectedLangauge.LanguageCode,
@@ -317,7 +317,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
                 //var naturalSampleRateHertz = AvailableVoices.Where(x => x.Name.Equals(SelectedVoice))
                 //   .Select(x => x.NaturalSampleRateHertz).FirstOrDefault();
-                await UpdateApplicationStatus("Done");
+                await UpdateApplicationStatus("Done", .5);
             }
             catch (Exception e)
             {

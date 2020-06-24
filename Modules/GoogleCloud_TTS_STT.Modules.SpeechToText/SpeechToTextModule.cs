@@ -12,11 +12,16 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText
         {
             IRegionManager regionManager = containerProvider.Resolve<IRegionManager>();
             regionManager.Regions[RegionNames.SpeechToTextRegion].Add(containerProvider.Resolve<SpeechToTextView>());
+
+            //Regions within module
+            regionManager.Regions[Core.Regions.RegionNames.SpeechToTextAPIConfigRegion]
+                .Add(containerProvider.Resolve<TranscriptionSettingsView>());
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            
+            containerRegistry.RegisterForNavigation<TranscriptionSettingsView>();
+            containerRegistry.RegisterForNavigation<SourceFileView>();
         }
     }
 }

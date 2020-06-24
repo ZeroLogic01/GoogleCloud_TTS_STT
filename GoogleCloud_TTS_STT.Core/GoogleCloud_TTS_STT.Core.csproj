@@ -155,9 +155,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\logo.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Images\error.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
