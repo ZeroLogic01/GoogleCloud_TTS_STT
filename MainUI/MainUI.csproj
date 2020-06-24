@@ -114,6 +114,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Core\Regions\DependentViewInfo.cs" />
+    <Compile Include="Core\Regions\DependentViewRegionBehavior.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -166,9 +168,7 @@
       <Name>GoogleCloud_TTS_STT.Modules.TextToSpeech</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Core\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="favicon.ico" />
     <Content Include="EnvironmentVariable\GOOGLE_APPLICATION_CREDENTIALS_Setup.exe">

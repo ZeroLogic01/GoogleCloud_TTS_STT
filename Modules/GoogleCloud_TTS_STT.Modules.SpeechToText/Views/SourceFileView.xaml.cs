@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GoogleCloud_TTS_STT.Core;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Views
     /// <summary>
     /// Interaction logic for SourceFileView.xaml
     /// </summary>
-    public partial class SourceFileView : UserControl
+    public partial class SourceFileView : UserControl, ISupportDataContext
     {
         public SourceFileView()
         {

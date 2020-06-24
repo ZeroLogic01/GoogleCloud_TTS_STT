@@ -1,24 +1,12 @@
 ﻿using GoogleCloud_TTS_STT.Core;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.EventAggregators;
-using GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers;
-using GoogleCloud_TTS_STT.Modules.SpeechToText.Models;
-using GoogleCloud_TTS_STT.Modules.SpeechToText.Views;
-using Prism.Commands;
 using Prism.Events;
-using Prism.Mvvm;
 using Prism.Regions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 
 namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 {
-    public class SpeechToTextViewModel : BindableBase
+    public class SpeechToTextViewModel : ViewModelBase
     {
         #region Properties
 

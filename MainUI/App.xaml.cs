@@ -3,9 +3,11 @@ using GoogleCloud_TTS_STT.Modules.SpeechToText;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using MainUI.Core.Regions;
 using MainUI.Views;
 using Prism.Ioc;
 using Prism.Modularity;
+using Prism.Regions;
 using System.Windows;
 
 namespace MainUI
@@ -38,6 +40,14 @@ namespace MainUI
                 message);
 
             e.Handled = true;
+        }
+
+
+        protected override void ConfigureDefaultRegionBehaviors(IRegionBehaviorFactory regionBehaviors)
+        {
+            base.ConfigureDefaultRegionBehaviors(regionBehaviors);
+
+            regionBehaviors.AddIfMissing(DependentViewRegionBehavior.BehaviorKey, typeof(DependentViewRegionBehavior));
         }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Google.Cloud.TextToSpeech.V1;
 using GoogleCloud_TTS_STT.Core;
-using GoogleCloud_TTS_STT.Core.EventAggregators;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Static;
-using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
-using Prism.Events;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;

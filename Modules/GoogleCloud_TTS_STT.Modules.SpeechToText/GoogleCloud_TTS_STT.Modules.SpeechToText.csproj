@@ -91,6 +91,8 @@
   <ItemGroup>
     <Compile Include="Core\EventAggregators\StatusEvent.cs" />
     <Compile Include="Core\EventAggregators\StatusEventParameters.cs" />
+    <Compile Include="Core\Regions\DependentViewInfo.cs" />
+    <Compile Include="Core\Regions\DependentViewRegionBehavior.cs" />
     <Compile Include="Core\Regions\RegionNames.cs" />
     <Compile Include="Helpers\LanguageHelper.cs" />
     <Compile Include="Helpers\ModuleHelper.cs" />

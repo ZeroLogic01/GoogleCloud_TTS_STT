@@ -8,14 +8,25 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText
 {
     public class SpeechToTextModule : IModule
     {
+
+        private readonly IRegionManager _regionManager;
+
+        public SpeechToTextModule(IRegionManager regionManager)
+        {
+            _regionManager = regionManager;
+        }
+
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            IRegionManager regionManager = containerProvider.Resolve<IRegionManager>();
-            regionManager.Regions[RegionNames.SpeechToTextRegion].Add(containerProvider.Resolve<SpeechToTextView>());
+
+            _regionManager.RegisterViewWithRegion(RegionNames.SpeechToTextRegion, typeof(SpeechToTextView));
+            
+            
+            _regionManager.RegisterViewWithRegion(Core.Regions.RegionNames.SpeechToTextAPIConfigRegion, typeof(TranscriptionSettingsView));
 
             //Regions within module
-            regionManager.Regions[Core.Regions.RegionNames.SpeechToTextAPIConfigRegion]
-                .Add(containerProvider.Resolve<TranscriptionSettingsView>());
+            //_regionManager.Regions[Core.Regions.RegionNames.SpeechToTextAPIConfigRegion]
+            //    .Add(containerProvider.Resolve<TranscriptionSettingsView>());
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -23,5 +34,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText
             containerRegistry.RegisterForNavigation<TranscriptionSettingsView>();
             containerRegistry.RegisterForNavigation<SourceFileView>();
         }
+
     }
 }

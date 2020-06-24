@@ -1,8 +1,4 @@
-﻿using GoogleCloud_TTS_STT.Core.EventAggregators;
-using MahApps.Metro.Controls.Dialogs;
-using Prism.Events;
-using Prism.Mvvm;
-using System.Threading.Tasks;
+﻿using Prism.Mvvm;
 
 namespace MainUI.ViewModels
 {
