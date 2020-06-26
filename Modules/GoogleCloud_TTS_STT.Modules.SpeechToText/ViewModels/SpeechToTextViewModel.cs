@@ -244,6 +244,8 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             set { SetProperty(ref _isSpeakersComboboxEnabled, value); }
         }
 
+        private readonly IEventAggregator _ea;
+
         #endregion
 
         #region Private Properties
@@ -260,8 +262,8 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         public SpeechToTextViewModel(IEventAggregator ea, ICloudStorage cloudStorage, ITranscriber googleTranscriber)
         {
-
-            ea.GetEvent<StatusEvent>().Subscribe(NotifyStatus, ThreadOption.PublisherThread, false);
+            _ea = ea;
+            _ea.GetEvent<StatusEvent>().Subscribe(NotifyStatus, ThreadOption.PublisherThread, false);
 
             _cloudStorage = cloudStorage;
             _googleTranscriber = googleTranscriber;
@@ -328,35 +330,40 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                     DiarizationSpeakerCount = SelectedSpeakerCount.Count,
                 };
 
+                string uri = string.Empty;
+
                 if (IsLocalStorageEnabled)
                 {
-                    AudioHelper audioHelper = new AudioHelper();
-                    if (audioHelper.IsShortAudioFile(SourceFile))
+                    string audioFile = string.Empty;
+                    // We don't need to convert flac/wav file
+                    var fileExtension = Path.GetExtension(SourceFile);
+                    if (!fileExtension.Equals(".flac") && !fileExtension.Equals(".wav"))
                     {
-                        await _googleTranscriber.TranscribeShortAudioFile(SourceFile, speechConfig, _cts.Token);
+                        audioFile = await GerConvertedFilePath(SourceFile, _cts.Token);
                     }
                     else
                     {
-                        bool isUploadedSuccessfully = await _cloudStorage.UploadAsync(SourceFile, mimeType: "audio/flac", cancellationToken: _cts.Token);
-
-                        if (isUploadedSuccessfully)
-                        {
-
-                            string uri = _cloudStorage.GetFileUri(Path.GetFileNameWithoutExtension(SourceFile));
-                            await Update("Transcribing");
-
-                            await _googleTranscriber.TranscribeLongAudioFile(uri, speechConfig, _cts.Token);
-
-
-                            await Update("Transcription completed");
-                        }
+                        audioFile = SourceFile;
                     }
+
+                    if (!string.IsNullOrWhiteSpace(audioFile))
+                    {
+                        uri = await UploadAudioFileToCloudAsync(audioFile, _cts.Token);
+                    }
+
+                }
+                else
+                {
+                    uri = SourceFileURI.ToString();
                 }
 
-                await Task.Delay(3000, _cts.Token);
-
-                await Update("Transcription completed", 1);
-                await Update("");
+                if (!string.IsNullOrWhiteSpace(uri))
+                {
+                    await Update("Transcribing");
+                    await _googleTranscriber.TranscribeLongAudioFile(uri, speechConfig, _cts.Token);
+                    await Update("Transcription completed");
+                }
+                await Update("", 2);
             }
             catch (TaskCanceledException) { }
             catch (Exception e)
@@ -370,8 +377,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                 CancelSpeechToTextCommand.RaiseCanExecuteChanged();
             }
         }
-
-
 
         private bool CanPerformSpeechToText()
         {
@@ -426,6 +431,29 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         #endregion
 
+        private async Task<string> GerConvertedFilePath(string sourceFile, CancellationToken cancellationToken)
+        {
+            AudioConverter audioHelper = new AudioConverter(_ea);
+            await Update($"Converting {Path.GetFileName(sourceFile)} to flac format");
+            var isConverted = await audioHelper.ConvertToAudioAsync(SourceFile, cancellationToken);
+
+            return isConverted ? audioHelper.TempOutputFile : string.Empty;
+        }
+
+        /// <summary>
+        /// Returns the uploaded file cloud storage URI if the file uploaded successfully, else empty string.
+        /// </summary>
+        private async Task<string> UploadAudioFileToCloudAsync(string filePath, CancellationToken cancellationToken)
+        {
+            bool isUploadedSuccessfully = await _cloudStorage.UploadAsync(filePath,
+                mimeType: "audio/flac", cancellationToken: cancellationToken);
+
+            if (isUploadedSuccessfully)
+            {
+                return _cloudStorage.GetFileUri(Path.GetFileNameWithoutExtension(filePath));
+            }
+            return string.Empty;
+        }
 
         private async void NotifyStatus(StatusEventParameters status)
         {
