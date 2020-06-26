@@ -1,5 +1,4 @@
-﻿using GoogleCloud_TTS_STT.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,11 +16,11 @@ using System.Windows.Shapes;
 namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Views
 {
     /// <summary>
-    /// Interaction logic for TranscriptionSettingsView.xaml
+    /// Interaction logic for ProgressBar.xaml
     /// </summary>
-    public partial class TranscriptionSettingsView : UserControl, ISupportDataContext
+    public partial class ProgressBar : UserControl
     {
-        public TranscriptionSettingsView()
+        public ProgressBar()
         {
             InitializeComponent();
         }

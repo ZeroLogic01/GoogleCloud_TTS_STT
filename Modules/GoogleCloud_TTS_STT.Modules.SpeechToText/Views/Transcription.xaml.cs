@@ -1,5 +1,4 @@
-﻿using GoogleCloud_TTS_STT.Core;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,11 +16,11 @@ using System.Windows.Shapes;
 namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Views
 {
     /// <summary>
-    /// Interaction logic for SourceFileView.xaml
+    /// Interaction logic for Transcription.xaml
     /// </summary>
-    public partial class SourceFileView : UserControl, ISupportDataContext
+    public partial class Transcription : UserControl
     {
-        public SourceFileView()
+        public Transcription()
         {
             InitializeComponent();
         }

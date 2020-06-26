@@ -28,30 +28,173 @@
     </UserControl.Resources>
 
     <Grid ShowGridLines="False">
+        <Grid.Resources>
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="200"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
 
+        <ContentControl Grid.Row="0"
+            prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.TranscriptionRegion}}"
+                                />
 
-        <TextBox Controls:TextBoxHelper.Watermark="Transcribed Text"
-                 Controls:TextBoxHelper.UseFloatingWatermark="True"
-                 TextWrapping="Wrap" FlowDirection="LeftToRight" MaxLength="5000"
-                 Grid.Row="0" 
-                 Text="{Binding TranscribedText,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                 AcceptsReturn="True" Margin="0 0 0 20"
-                 VerticalScrollBarVisibility="Auto"/>
+        <!--STT Transcription settings-->
+        <Grid Grid.Row="1" Margin="0 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="1"
-            prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.SpeechToTextAPIConfigRegion}}" 
-            IsTabStop="False"/>
+            <ComboBox Controls:TextBoxHelper.Watermark="Language"
+                      Controls:TextBoxHelper.UseFloatingWatermark="True"
+                      Grid.Column="0" Grid.Row="0" Margin="0 0 5 0" MaxDropDownHeight="160"
+                      ItemsSource="{Binding  Path=SupportedLangauges,UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding Path=SelectedLangauge}"
+                  SelectedValue="{Binding Path=SelectedLangauge.LanguageCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                  DisplayMemberPath="LanguageName"
+                  SelectedValuePath="LanguageCode"/>
 
-        <Grid Grid.Row="2" Margin="-14 0 -14 0" HorizontalAlignment="Stretch" 
+            <ComboBox Controls:TextBoxHelper.Watermark="Transcription Model"
+                      Controls:TextBoxHelper.UseFloatingWatermark="True"
+                      Grid.Column="1" Grid.Row="0" Margin="5 0 0 0"
+                       ItemsSource="{Binding  Path=SupportedTranscriptionModels,UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding Path=SelectedTranscriptionModel}"
+                  SelectedValue="{Binding Path=SelectedTranscriptionModel.ModelValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                  DisplayMemberPath="ModelName"
+                  SelectedValuePath="ModelValue"
+                  />
+
+
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width=".5*"/>
+                <ColumnDefinition Width=".5*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <ComboBox Controls:TextBoxHelper.Watermark="Speaker diarization"
+                      Controls:TextBoxHelper.UseFloatingWatermark="True"
+                      Grid.Column="0" Grid.Row="0" Margin="0 0 5 0"
+                       ItemsSource="{Binding  Path=SpeakerDiarizationList,UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding Path=SelectedSpeakerDiarization}"
+                  SelectedValue="{Binding Path=SelectedSpeakerDiarization.Value,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                  DisplayMemberPath="DisplayName"
+                  SelectedValuePath="Value"/>
+
+
+            <ComboBox Controls:TextBoxHelper.Watermark="Speakers"
+                      Controls:TextBoxHelper.UseFloatingWatermark="True"
+                      Grid.Column="1" Grid.Row="0" Margin="5 0 5 0"
+                      ItemsSource="{Binding SpeakersList}"
+                      SelectedItem="{Binding SelectedSpeakerCount}"
+                      SelectedValue="{Binding Path=SelectedSpeakerCount.Count,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      DisplayMemberPath="Name"
+                      SelectedValuePath="Count"
+                      IsEnabled="{Binding IsSpeakersComboboxEnabled}"
+                      />
+
+            <DockPanel Grid.Column="2" Margin="5 0 0 0">
+                <TextBlock Text="Punctuation" FontSize="10" DockPanel.Dock="Top"/>
+                <Controls:ToggleSwitch Margin="0 -3 0 0"
+                                   IsOn="{Binding IsAutomaticPunctuationEnabled}" DockPanel.Dock="Top">
+                    <Controls:ToggleSwitch.RenderTransform>
+                        <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                    </Controls:ToggleSwitch.RenderTransform>
+                </Controls:ToggleSwitch>
+            </DockPanel>
+        </Grid>
+
+        <!--Source audio/video file-->
+        <Grid Grid.Row="3" Margin="0 5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width=".4*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBox Controls:TextBoxHelper.Watermark="Source audio/video file"
+                     Controls:TextBoxHelper.UseFloatingWatermark="True"
+                     Controls:TextBoxHelper.WatermarkAlignment="Center"
+                     IsReadOnly="True"
+                     Grid.Column="0" Grid.Row="0" Margin="0 0 5 0"
+                     Text="{Binding  Path=SourceFile,UpdateSourceTrigger=PropertyChanged}"
+                     IsTabStop="False"
+                     Visibility="{Binding Path=IsLocalStorageEnabled, Converter={StaticResource BoolToVis}}"/>
+
+            <Button Content="..." Command="{Binding ChooseFileCommand}" 
+                     HorizontalAlignment="Stretch" 
+                     VerticalContentAlignment="Center"
+                     Margin="0 0 10 0" 
+                     Grid.Column="1" Grid.Row="0" 
+                     Visibility="{Binding Path=IsLocalStorageEnabled, Converter={StaticResource BoolToVis}}"
+                    />
+
+            <TextBox Controls:TextBoxHelper.Watermark="Cloud storage URI"
+                     Controls:TextBoxHelper.UseFloatingWatermark="True"
+                     Grid.Column="0" Grid.ColumnSpan="2"
+                     Grid.Row="0" Margin="0 0 10 0"
+                     Text="{Binding  Path=SourceFileURI,UpdateSourceTrigger=PropertyChanged,Mode=OneWayToSource}"
+                     Visibility="{Binding Path=IsCloudStorageEnabled, Converter={StaticResource BoolToVis}}"/>
+
+
+            <DockPanel Grid.Row="0" Grid.Column="2" Margin="5 0 0 0">
+                <TextBlock Text="Source File From" FontSize="10" DockPanel.Dock="Top"/>
+                <Controls:ToggleSwitch Grid.Row="0" 
+                                   Grid.Column="2" 
+                                   OffContent="Cloud Storage"
+                                   OnContent="Local Computer"
+                                   Margin="0 -3 0 0"
+                                   IsOn="{Binding Path=IsLocalStorageEnabled}">
+                    <Controls:ToggleSwitch.RenderTransform>
+                        <ScaleTransform ScaleX=".8" ScaleY=".8"/>
+                    </Controls:ToggleSwitch.RenderTransform>
+                </Controls:ToggleSwitch>
+            </DockPanel>
+
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" FlowDirection="RightToLeft">
+            <Button  Content="Cancel" Command="{Binding CancelSpeechToTextCommand}" 
+                     IsEnabled="{Binding IsCancelButtonEnabled}" 
+                     Visibility="{Binding Path=IsCancelButtonEnabled, Converter={StaticResource BoolToVis}}"
+                     HorizontalAlignment="Right" Width="120"
+                     Margin="5"/>
+
+            <Button  Content="Transcribe" Command="{Binding TranscribeCommand}" 
+               IsEnabled="{Binding IsTranscribeButtonEnabled}" 
+               HorizontalAlignment="Right" Width="120"
+               Margin="0 5 5 5"/>
+
+        </StackPanel>
+
+        <Grid Grid.Row="5" Margin="-14 0 -14 0" HorizontalAlignment="Stretch" 
                Background="{DynamicResource MahApps.Brushes.Accent}">
 
-            <Label Foreground="{DynamicResource MahApps.Brushes.SystemControlHighlightChromeWhite}" Padding="8 0 8 0" VerticalAlignment="Center" BorderThickness="0 0 0 0" BorderBrush="Gray"
-                   Content="{Binding StatusText}"/>
+            <Label Foreground="{DynamicResource MahApps.Brushes.SystemControlHighlightAltChromeWhite}" Padding="8 0 8 0" VerticalAlignment="Center" BorderThickness="0 0 0 0" BorderBrush="Gray"
+                 Panel.ZIndex="1"  Content="{Binding StatusText}"
+                   Margin="14 0"/>
+
+            <ContentControl IsTabStop="False" Panel.ZIndex="-100" 
+                            prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.ProgessBarRegion}}"
+                                />
+
         </Grid>
 
     </Grid>
