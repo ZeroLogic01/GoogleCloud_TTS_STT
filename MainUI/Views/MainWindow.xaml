@@ -64,7 +64,7 @@
 
 
             <!--Google Speech to Text Region-->
-            <Controls:MetroTabItem Header="Speech to Text" IsSelected="True">
+            <Controls:MetroTabItem Header="Speech to Text">
                 <ContentControl IsTabStop="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.SpeechToTextRegion}}"
                                  Margin="8 8 8 0"/>
             </Controls:MetroTabItem>

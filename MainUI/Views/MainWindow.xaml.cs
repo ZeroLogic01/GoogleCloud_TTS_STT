@@ -23,7 +23,7 @@ namespace MainUI.Views
 
             var result = await DialogManager.ShowMessageAsync(this, "Are you sure?",
                 $"You are about to set the user environment variable GOOGLE_APPLICATION_CREDENTIALS for the current user " +
-                $"{System.Security.Principal.WindowsIdentity.GetCurrent().Name}. The changes will take effect the next time you launch {Assembly.GetExecutingAssembly().GetName().Name}.",
+                $"{System.Security.Principal.WindowsIdentity.GetCurrent().Name}. This change will take effect the next time you launch {Assembly.GetExecutingAssembly().GetName().Name}. The App will shutdown.",
                      MessageDialogStyle.AffirmativeAndNegative);
 
             System.Console.WriteLine(result);

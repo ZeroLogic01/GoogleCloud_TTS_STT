@@ -7,7 +7,7 @@ using System.Windows;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Balconette’s Speech Services")]
+[assembly: AssemblyTitle("Speech Services")]
 [assembly: AssemblyDescription("Balconette’s Text to speech & Speech to text.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("ZeroLogic")]
