@@ -56,6 +56,12 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
                 longOperation = await longOperation.PollUntilCompletedAsync();
 
                 var response = longOperation.Result;
+
+                if (response.Results.Count == 0)
+                {
+                    throw new NotSupportedException("We could not process your audio with this model.");
+                }
+
                 foreach (var result in response.Results)
                 {
                     foreach (var alternative in result.Alternatives)
@@ -73,12 +79,14 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
 
         private RecognitionConfig GetRecognitionConfig(GoogeSpeechConfig googleSpeechConfig)
         {
-            var config = new RecognitionConfig();
-            config.LanguageCode = googleSpeechConfig.LanguageCode;
-            config.Model = googleSpeechConfig.TranscriptionModel;
-            config.EnableAutomaticPunctuation = googleSpeechConfig.EnableAutomaticPunctuation;
-            config.EnableSeparateRecognitionPerChannel = googleSpeechConfig.EnableSeparateRecognitionPerChannel;
-            config.AudioChannelCount = googleSpeechConfig.AudioChannelCount;
+            var config = new RecognitionConfig
+            {
+                LanguageCode = googleSpeechConfig.LanguageCode,
+                Model = googleSpeechConfig.TranscriptionModel,
+                EnableAutomaticPunctuation = googleSpeechConfig.EnableAutomaticPunctuation,
+                EnableSeparateRecognitionPerChannel = googleSpeechConfig.EnableSeparateRecognitionPerChannel,
+                AudioChannelCount = googleSpeechConfig.AudioChannelCount
+            };
 
             if (googleSpeechConfig.EnableSeparateRecognitionPerChannel)
             {

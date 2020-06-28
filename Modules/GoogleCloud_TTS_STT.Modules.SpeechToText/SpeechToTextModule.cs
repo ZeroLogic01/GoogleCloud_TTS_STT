@@ -2,9 +2,11 @@
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business.Interfaces;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business.Models;
+using GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Views;
 using Prism.Ioc;
 using Prism.Modularity;
+using Prism.Mvvm;
 using Prism.Regions;
 
 namespace GoogleCloud_TTS_STT.Modules.SpeechToText
@@ -30,12 +32,13 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            //containerRegistry.RegisterForNavigation<TranscriptionSettingsView>();
-            //containerRegistry.RegisterForNavigation<SourceFileView>();
-
             containerRegistry.Register<ISpeechConfig, GoogeSpeechConfig>();
             containerRegistry.RegisterSingleton<ICloudStorage, GoogleCloudStorage>();
             containerRegistry.RegisterSingleton<ITranscriber, GoogleTranscriber>();
+
+            ViewModelLocationProvider.Register<SpeechToTextView, SpeechToTextViewModel>();
+            ViewModelLocationProvider.Register<ProgressBar, ProgressBarViewModel>();
+            ViewModelLocationProvider.Register<Transcription, TranscriptionViewModel>();
         }
 
     }

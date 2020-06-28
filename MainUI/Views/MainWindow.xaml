@@ -5,7 +5,7 @@
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         Dialog:DialogParticipation.Register="{Binding}"
         xmlns:core="clr-namespace:GoogleCloud_TTS_STT.Core;assembly=GoogleCloud_TTS_STT.Core"
-        xmlns:prism="http://prismlibrary.com/"
+        xmlns:prism="http://prismlibrary.com/" xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         prism:ViewModelLocator.AutoWireViewModel="True"
         Title="{Binding Title}"
         NonActiveWindowTitleBrush="{DynamicResource MahApps.Brushes.Accent}"
@@ -41,6 +41,12 @@
             </Button>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ApplicationCommands.WindowClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
 
     <Grid Margin="6 6 6 0">
 

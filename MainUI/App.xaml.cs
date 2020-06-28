@@ -24,6 +24,8 @@ namespace MainUI
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            containerRegistry.RegisterSingleton<IApplicationCommands, ApplicationCommands>();
+
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
@@ -35,9 +37,18 @@ namespace MainUI
 
         private async void PrismApplication_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            var message = ExceptionHelper.ExtractExceptionMessage(e.Exception);
-            await DialogManager.ShowMessageAsync(Current.MainWindow as MetroWindow, "An unknown error occurred!",
-                message);
+            var errorMsg = ExceptionHelper.ExtractExceptionMessage(e.Exception);
+            {
+                string caption = "An unknown error occurred!";
+                try
+                {
+                    await DialogManager.ShowMessageAsync(Current.MainWindow as MetroWindow, caption,
+                        errorMsg);
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch { MessageBox.Show(errorMsg, caption, MessageBoxButton.OK, MessageBoxImage.Error); }
+#pragma warning restore CA1031 // Do not catch general exception types
+            }
 
             e.Handled = true;
         }

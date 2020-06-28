@@ -9,11 +9,11 @@ namespace GoogleCloud_TTS_STT.Core
 {
     public interface IApplicationCommands
     {
-        CompositeCommand NavigateCommand { get; }
+        CompositeCommand WindowClosingCommand { get; }
     }
 
     public class ApplicationCommands : IApplicationCommands
     {
-        public CompositeCommand NavigateCommand { get; } = new CompositeCommand();
+        public CompositeCommand WindowClosingCommand { get; } = new CompositeCommand();
     }
 }

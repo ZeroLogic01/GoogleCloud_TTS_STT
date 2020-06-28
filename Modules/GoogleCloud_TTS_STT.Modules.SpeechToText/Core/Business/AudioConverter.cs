@@ -88,7 +88,9 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
                       ffMpeg.ConvertMedia(sourceFile,
                          TempOutputFile, DefaultFormat);
                   }
+#pragma warning disable CA1031 // Do not catch general exception types
                   catch (NullReferenceException) { }
+#pragma warning restore CA1031 // Do not catch general exception types
                   catch (Exception ex)
                   {
                       throw ex;

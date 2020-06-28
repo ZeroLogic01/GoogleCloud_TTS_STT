@@ -13,8 +13,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Regions
     {
         public const string BehaviorKey = "DependentViewRegionBehavior";
         private readonly IContainerExtension _container;
-
-        Dictionary<object, List<DependentViewInfo>> _dependentViewCache = new Dictionary<object, List<DependentViewInfo>>();
+        private Dictionary<object, List<DependentViewInfo>> _dependentViewCache = new Dictionary<object, List<DependentViewInfo>>();
 
         public DependentViewRegionBehavior(IContainerExtension container)
         {
@@ -49,11 +48,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Regions
                             {
                                 infoDC.DataContext = viewDC.DataContext;
                             }
-
-                            //if (info.View is ISupportRichText infoRT && newView is ISupportRichText viewRT)
-                            //{
-                            //    infoRT.RichTextEditor = viewRT.RichTextEditor;
-                            //}
 
                             dependentViews.Add(info);
                         }
@@ -103,9 +97,11 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Regions
 
         DependentViewInfo CreateDependentViewInfo(DependentViewAttribute attribute)
         {
-            var info = new DependentViewInfo();
-            info.Region = attribute.Region;
-            info.View = _container.Resolve(attribute.Type);
+            var info = new DependentViewInfo
+            {
+                Region = attribute.Region,
+                View = _container.Resolve(attribute.Type)
+            };
             return info;
         }
 

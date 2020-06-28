@@ -1,4 +1,9 @@
-﻿using Prism.Mvvm;
+﻿using GoogleCloud_TTS_STT.Core;
+using Prism.Commands;
+using Prism.Mvvm;
+using System;
+using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace MainUI.ViewModels
 {
@@ -18,8 +23,29 @@ namespace MainUI.ViewModels
             set { SetProperty(ref _statusText, value); }
         }
 
-        public MainWindowViewModel()
+
+
+        private IApplicationCommands _applicationCommands;
+        public IApplicationCommands ApplicationCommands
         {
+            get { return _applicationCommands; }
+            set { SetProperty(ref _applicationCommands, value); }
         }
+
+        public MainWindowViewModel() { }
+
+        public MainWindowViewModel(IApplicationCommands applicationCommands)
+        {
+            // WindowClosingCommand = new DelegateCommand(ExecuteWindowClosingCommand);
+            //applicationCommands.WindowClosingCommand.RegisterCommand(WindowClosingCommand);
+            ApplicationCommands = applicationCommands;
+        }
+
+        //private async void ExecuteWindowClosingCommand()
+        //{
+        //    await Task.Delay(TimeSpan.FromSeconds(30));
+        //}
+
+
     }
 }

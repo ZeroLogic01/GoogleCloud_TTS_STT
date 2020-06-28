@@ -13,8 +13,7 @@ namespace MainUI.Core.Regions
     {
         public const string BehaviorKey = "DependentViewRegionBehavior";
         private readonly IContainerExtension _container;
-
-        Dictionary<object, List<DependentViewInfo>> _dependentViewCache = new Dictionary<object, List<DependentViewInfo>>();
+        readonly Dictionary<object, List<DependentViewInfo>> _dependentViewCache = new Dictionary<object, List<DependentViewInfo>>();
 
         public DependentViewRegionBehavior(IContainerExtension container)
         {
@@ -103,9 +102,11 @@ namespace MainUI.Core.Regions
 
         DependentViewInfo CreateDependentViewInfo(DependentViewAttribute attribute)
         {
-            var info = new DependentViewInfo();
-            info.Region = attribute.Region;
-            info.View = _container.Resolve(attribute.Type);
+            var info = new DependentViewInfo
+            {
+                Region = attribute.Region,
+                View = _container.Resolve(attribute.Type)
+            };
             return info;
         }
 

@@ -19,7 +19,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Views
     /// <summary>
     /// Interaction logic for ViewA.xaml
     /// </summary>
-    public partial class SpeechToTextView : UserControl, ISupportDataContext
+    public partial class SpeechToTextView : UserControl
     {
         public SpeechToTextView()
         {

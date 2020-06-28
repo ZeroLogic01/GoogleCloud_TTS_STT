@@ -152,6 +152,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
         public DelegateCommand CancelSpeechToTextCommand { get; set; }
 
         public DelegateCommand ChooseFileCommand { get; set; }
+        public DelegateCommand ClosingCommand { get; set; }
 
         #endregion
 
@@ -260,15 +261,18 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         #endregion
 
-        public SpeechToTextViewModel(IEventAggregator ea, ICloudStorage cloudStorage, ITranscriber googleTranscriber)
+        public SpeechToTextViewModel(IEventAggregator ea, IApplicationCommands applicationCommands, ICloudStorage cloudStorage, ITranscriber googleTranscriber)
         {
             _ea = ea;
             _ea.GetEvent<StatusEvent>().Subscribe(NotifyStatus, ThreadOption.PublisherThread, false);
+
 
             _cloudStorage = cloudStorage;
             _googleTranscriber = googleTranscriber;
 
             _cts = new CancellationTokenSource();
+
+            AudioConverter.CleanTempDataOnStartUp();
 
             IsCloudStorageEnabled = !IsLocalStorageEnabled;
 
@@ -280,9 +284,19 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
             ChooseFileCommand = new DelegateCommand(ChooseSourceFile);
             TranscribeCommand = new DelegateCommand(PerformSpeechToText, CanPerformSpeechToText);
-            CancelSpeechToTextCommand = new DelegateCommand(CancelSpeechToText, CanCancelSpeechToText);
+            CancelSpeechToTextCommand = new DelegateCommand(async () => await CancelSpeechToText(), CanCancelSpeechToText);
+
+            ClosingCommand = new DelegateCommand(async () => await Closing());
+            if (ClosingCommand != null) /* order is important here*/
+                applicationCommands.WindowClosingCommand.RegisterCommand(ClosingCommand);
 
 
+
+        }
+
+        private async Task Closing()
+        {
+            await CancelSpeechToText();
         }
 
         #region Methods
@@ -305,6 +319,8 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             }
 
         }
+
+        #endregion
 
         #region STT Command Methods
 
@@ -335,7 +351,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                 if (IsLocalStorageEnabled)
                 {
                     string audioFile = string.Empty;
-                    // We don't need to convert flac/wav file
+                    // get the file extension to see if it's a file other than flac/wav as we don't need to convert flac/wav file
                     var fileExtension = Path.GetExtension(SourceFile);
                     if (!fileExtension.Equals(".flac") && !fileExtension.Equals(".wav"))
                     {
@@ -352,7 +368,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                     }
 
                 }
-                else
+                else if (IsCloudStorageEnabled)
                 {
                     uri = SourceFileURI.ToString();
                 }
@@ -363,7 +379,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                     await _googleTranscriber.TranscribeLongAudioFile(uri, speechConfig, _cts.Token);
                     await Update("Transcription completed");
                 }
-                await Update("", 2);
             }
             catch (TaskCanceledException) { }
             catch (Exception e)
@@ -372,6 +387,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             }
             finally
             {
+                await Update("", 2);
                 IsTranscriptionJobRunning = false;
                 TranscribeCommand.RaiseCanExecuteChanged();
                 CancelSpeechToTextCommand.RaiseCanExecuteChanged();
@@ -396,7 +412,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
         #region Cancel Speech To Text Command Methods
 
 
-        private async void CancelSpeechToText()
+        private async Task CancelSpeechToText()
         {
             try
             {
@@ -420,6 +436,8 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                 _cts = new CancellationTokenSource(); // "Reset" the cancellation token source...
 
                 IsTranscriptionJobRunning = false;
+
+                await Task.Delay(TimeSpan.FromSeconds(20));
             }
         }
         private bool CanCancelSpeechToText()
@@ -429,13 +447,14 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         #endregion
 
-        #endregion
 
         private async Task<string> GerConvertedFilePath(string sourceFile, CancellationToken cancellationToken)
         {
             AudioConverter audioHelper = new AudioConverter(_ea);
             await Update($"Converting {Path.GetFileName(sourceFile)} to flac format");
             var isConverted = await audioHelper.ConvertToAudioAsync(SourceFile, cancellationToken);
+            if (isConverted)
+                await Update($"{Path.GetFileName(audioHelper.TempOutputFile)} created");
 
             return isConverted ? audioHelper.TempOutputFile : string.Empty;
         }

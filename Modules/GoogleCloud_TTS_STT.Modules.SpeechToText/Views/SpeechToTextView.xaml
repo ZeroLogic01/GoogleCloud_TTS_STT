@@ -40,7 +40,7 @@
             <RowDefinition Height="24"/>
         </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="0"
+        <ContentControl Grid.Row="0" IsTabStop="False"
             prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.TranscriptionRegion}}"
                                 />
 
@@ -171,9 +171,10 @@
         </Grid>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" FlowDirection="RightToLeft">
+           
+
             <Button  Content="Cancel" Command="{Binding CancelSpeechToTextCommand}" 
                      IsEnabled="{Binding IsCancelButtonEnabled}" 
-                     Visibility="{Binding Path=IsCancelButtonEnabled, Converter={StaticResource BoolToVis}}"
                      HorizontalAlignment="Right" Width="120"
                      Margin="5"/>
 
