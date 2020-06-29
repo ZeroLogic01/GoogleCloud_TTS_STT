@@ -276,7 +276,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
             IsCloudStorageEnabled = !IsLocalStorageEnabled;
 
-            SelectedLangauge = SupportedLangauges.FirstOrDefault(lang => lang.LanguageCode.Equals("en"));
+            SelectedLangauge = SupportedLangauges.FirstOrDefault(lang => lang.LanguageCode.Equals("en-GB"));
             SelectedTranscriptionModel = SupportedTranscriptionModels.FirstOrDefault(model => model.ModelName.Equals("Default", StringComparison.OrdinalIgnoreCase));
             SelectedSpeakerDiarization = SpeakerDiarizationList.FirstOrDefault(x => x.Value == SpeakerDiarizationEnum.Off);
             SelectedSpeakerCount = SpeakersList.FirstOrDefault(x => x.Count == 2);

@@ -4,10 +4,13 @@ using GoogleCloud_TTS_STT.Modules.TextToSpeech;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using MainUI.Core.Regions;
+using MainUI.ViewModels;
 using MainUI.Views;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
+using System;
+using System.IO;
 using System.Windows;
 
 namespace MainUI
@@ -17,6 +20,15 @@ namespace MainUI
     /// </summary>
     public partial class App
     {
+        public App()
+        {
+            var jsonFile = Environment.GetEnvironmentVariable(AppConstants.GOOGLE_APPLICATION_CREDENTIALS);
+            if (!File.Exists(jsonFile))
+            {
+                MainWindowViewModel.SetEnvironmentVariable();
+                App.Current.Shutdown();
+            }
+        }
         protected override Window CreateShell()
         {
             return Container.Resolve<MainWindow>();
@@ -45,9 +57,7 @@ namespace MainUI
                     await DialogManager.ShowMessageAsync(Current.MainWindow as MetroWindow, caption,
                         errorMsg);
                 }
-#pragma warning disable CA1031 // Do not catch general exception types
                 catch { MessageBox.Show(errorMsg, caption, MessageBoxButton.OK, MessageBoxImage.Error); }
-#pragma warning restore CA1031 // Do not catch general exception types
             }
 
             e.Handled = true;

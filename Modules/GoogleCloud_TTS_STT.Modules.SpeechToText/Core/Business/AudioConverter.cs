@@ -14,7 +14,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
         #region Private Fields
 
         private static readonly string _appDataRootDir = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}" +
-              @"\Audio to Text Transcriber\Data\";
+              @"\Balconette Speech Services\STT\Data\";
         private static readonly string _uniqueFileName = GetUniqueFileName();
         private readonly IEventAggregator _eventAggregator;
 
@@ -42,13 +42,21 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
 
         public static void CleanTempDataOnStartUp()
         {
-
-            DirectoryInfo di = new DirectoryInfo(_appDataRootDir);
-
-            foreach (FileInfo file in di.GetFiles())
+            try
             {
-                file.Delete();
+                DirectoryInfo di = new DirectoryInfo(_appDataRootDir);
+
+                if (!di.Exists)
+                {
+                    return;
+                }
+
+                foreach (FileInfo file in di.GetFiles())
+                {
+                    file.Delete();
+                }
             }
+            catch { }
         }
 
 
@@ -67,6 +75,8 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
         public async Task<bool> ConvertToAudioAsync(string sourceFile,
             CancellationToken cancellationToken = default)
         {
+            Directory.CreateDirectory(_appDataRootDir);
+
             var ffMpeg = new FFMpegConverter();
             ffMpeg.ConvertProgress += FfMpeg_ConvertProgress;
 
@@ -74,7 +84,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
             UpdateProgressBar(ProgressType.ProgressBarMaximumValue, 100);
 
 
-            Console.WriteLine(TempOutputFile);
+         //   Console.WriteLine(TempOutputFile);
 
             var cancellationTokenRegisteration = cancellationToken.Register(() =>
             {

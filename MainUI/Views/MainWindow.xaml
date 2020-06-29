@@ -11,7 +11,7 @@
         NonActiveWindowTitleBrush="{DynamicResource MahApps.Brushes.Accent}"
         BorderThickness="0"
         GlowBrush="Black"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen" 
         Height="500" Width="640" MinHeight="450" MinWidth="600">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
@@ -27,7 +27,8 @@
     </Controls:MetroWindow.IconTemplate>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
-            <Button Click="SetEnvironmentVariable" Content="Set Environment Variable"
+            <Button Command="{Binding EnvironmentVariableCommand}" 
+                    Content="Set Environment Variable"
                     ToolTip="Set the environment variable GOOGLE_APPLICATION_CREDENTIALS to the path of the JSON file that contains your service account key.">
                 <Button.ContentTemplate>
                     <DataTemplate>

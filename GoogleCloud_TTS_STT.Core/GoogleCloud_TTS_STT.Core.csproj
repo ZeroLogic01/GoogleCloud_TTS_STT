@@ -116,6 +116,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppConstants.cs" />
     <Compile Include="AppHelper.cs" />
     <Compile Include="DependentViewAttribute.cs" />
     <Compile Include="ExceptionHelper.cs" />

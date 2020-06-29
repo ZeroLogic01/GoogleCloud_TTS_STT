@@ -1,9 +1,14 @@
 ﻿using GoogleCloud_TTS_STT.Core;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
-using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MainUI.ViewModels
 {
@@ -23,7 +28,7 @@ namespace MainUI.ViewModels
             set { SetProperty(ref _statusText, value); }
         }
 
-
+        public DelegateCommand EnvironmentVariableCommand { get; set; }
 
         private IApplicationCommands _applicationCommands;
         public IApplicationCommands ApplicationCommands
@@ -36,9 +41,41 @@ namespace MainUI.ViewModels
 
         public MainWindowViewModel(IApplicationCommands applicationCommands)
         {
-            // WindowClosingCommand = new DelegateCommand(ExecuteWindowClosingCommand);
-            //applicationCommands.WindowClosingCommand.RegisterCommand(WindowClosingCommand);
             ApplicationCommands = applicationCommands;
+
+            EnvironmentVariableCommand = new DelegateCommand(ChangeEnvironmentVariable);
+        }
+
+        private async void ChangeEnvironmentVariable()
+        {
+            var result = await DialogManager.ShowMessageAsync(Application.Current.MainWindow as MetroWindow, "Are you sure?",
+                $"You are about to set the user environment variable GOOGLE_APPLICATION_CREDENTIALS for the current user " +
+                $"{System.Security.Principal.WindowsIdentity.GetCurrent().Name}. This change will take effect the next time you launch {Assembly.GetExecutingAssembly().GetName().Name}. The App will shutdown.",
+                     MessageDialogStyle.AffirmativeAndNegative);
+
+            if (result == MessageDialogResult.Affirmative)
+            {
+                SetEnvironmentVariable();
+            }
+        }
+
+        public static void SetEnvironmentVariable()
+        {
+            string programFileName = "GOOGLE_APPLICATION_CREDENTIALS_Setup.exe";
+            string programPath = Path.Combine(Directory.GetCurrentDirectory(), "EnvironmentVariable", programFileName);
+            if (File.Exists(programPath))
+            {
+                Process proc = new Process();
+                proc.StartInfo.FileName = programPath;
+                proc.StartInfo.UseShellExecute = true;
+                //proc.StartInfo.Verb = "runas";
+                proc.Start();
+                proc.WaitForExit();
+                if (proc.ExitCode == 0)
+                {
+                    Application.Current.Shutdown();
+                }
+            }
         }
 
         //private async void ExecuteWindowClosingCommand()

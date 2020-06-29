@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Google.Apis.Storage.v1.Data;
 using Google.Apis.Upload;
 using Google.Cloud.Storage.V1;
+using GoogleCloud_TTS_STT.Core;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business.Interfaces;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Enums;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.EventAggregators;
@@ -18,7 +19,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
     {
         #region Private Fields
 
-        private const string environmentVariable = "GOOGLE_APPLICATION_CREDENTIALS";
         public const string DefaultBucketName = @"polar-valor-240206-audio-files-storage-bucket";
         private readonly string _projectId;
         private readonly IEventAggregator _eventAggregator;
@@ -28,11 +28,11 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
         public GoogleCloudStorage(IEventAggregator eventAggregator)
         {
 
-            var jsonFile = Environment.GetEnvironmentVariable(environmentVariable);
+            var jsonFile = Environment.GetEnvironmentVariable(AppConstants.GOOGLE_APPLICATION_CREDENTIALS);
 
             if (!File.Exists(jsonFile))
             {
-                throw new FileNotFoundException($"Could not read the environment variable {environmentVariable}");
+                throw new FileNotFoundException($"Could not read the environment variable {AppConstants.GOOGLE_APPLICATION_CREDENTIALS}");
             }
 
             using (StreamReader file = File.OpenText(jsonFile))

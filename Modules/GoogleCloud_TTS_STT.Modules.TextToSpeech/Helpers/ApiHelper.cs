@@ -30,24 +30,31 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
 
         public static string GetLanguageDisplayName(string languageCode)
         {
-            var culture = new CultureInfo(languageCode);
-            string displayName = culture.DisplayName;
-            if (displayName.Contains("Unknown Locale"))
+            try
             {
-                switch (languageCode)
+                var culture = new CultureInfo(languageCode);
+                string displayName = culture.DisplayName;
+                if (displayName.Contains("Unknown Locale"))
                 {
-                    case "cmn-CN":
-                        displayName = "Chinese Mandarin (Simplified China)";
-                        break;
-                    case "cmn-TW":
-                        displayName = "Chinese Mandarin (Traditional Taiwan)";
-                        break;
-                    default:
-                        displayName = new CultureInfo(languageCode.Split('-')[0]).DisplayName;
-                        break;
+                    switch (languageCode)
+                    {
+                        case "cmn-CN":
+                            displayName = "Chinese Mandarin (Simplified China)";
+                            break;
+                        case "cmn-TW":
+                            displayName = "Chinese Mandarin (Traditional Taiwan)";
+                            break;
+                        default:
+                            displayName = new CultureInfo(languageCode.Split('-')[0]).DisplayName;
+                            break;
+                    }
                 }
+                return displayName;
             }
-            return displayName;
+            catch
+            {
+                return languageCode;
+            }
         }
 
         /// <summary>
