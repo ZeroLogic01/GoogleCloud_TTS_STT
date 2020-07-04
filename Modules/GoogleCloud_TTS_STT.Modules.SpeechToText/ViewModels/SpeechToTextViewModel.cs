@@ -200,26 +200,14 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         #region Speaker Diarization
 
-        private List<SpeakerDiarization> _speakerDiarizationList = ModuleHelper.GetSpeakerDiarizationList();
-        public List<SpeakerDiarization> SpeakerDiarizationList
+        private bool _isSpeakerDiarizationEnabled = true;
+        public bool IsSpeakerDiarizationEnabled
         {
-            get { return _speakerDiarizationList; }
-            set { SetProperty(ref _speakerDiarizationList, value); }
+            get { return _isSpeakerDiarizationEnabled; }
+            set { SetProperty(ref _isSpeakerDiarizationEnabled, value); }
         }
 
-        private SpeakerDiarization _selectedSpeakerDiarization;
-        public SpeakerDiarization SelectedSpeakerDiarization
-        {
-            get { return _selectedSpeakerDiarization; }
-            set
-            {
-                SetProperty(ref _selectedSpeakerDiarization, value);
 
-                // let the user select speaker count only if the SelectedSpeakerDiarization.Value is not off neither Recognize1SpeakerPerChannel
-                IsSpeakersComboboxEnabled = value.Value != SpeakerDiarizationEnum.Off
-                                            && value.Value != SpeakerDiarizationEnum.Recognize1SpeakerPerChannel;
-            }
-        }
 
         #endregion
 
@@ -279,7 +267,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
             SelectedLangauge = SupportedLangauges.FirstOrDefault(lang => lang.LanguageCode.Equals("en-GB"));
             SelectedTranscriptionModel = SupportedTranscriptionModels.FirstOrDefault(model => model.ModelName.Equals("Default", StringComparison.OrdinalIgnoreCase));
-            SelectedSpeakerDiarization = SpeakerDiarizationList.FirstOrDefault(x => x.Value == SpeakerDiarizationEnum.DownmixAndRecognizeMultipleSpeakers);
             SelectedSpeakerCount = SpeakersList.FirstOrDefault(x => x.Count == -1);
 
 
@@ -466,10 +453,9 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             {
                 LanguageCode = SelectedLangauge.LanguageCode,
                 TranscriptionModel = SelectedTranscriptionModel.ModelValue,
-                EnableSeparateRecognitionPerChannel = SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.Recognize1SpeakerPerChannel,
+                //  EnableSeparateRecognitionPerChannel = !IsSpeakerDiarizationEnabled,
                 EnableAutomaticPunctuation = IsAutomaticPunctuationEnabled,
-                EnableSpeakerDiarization = SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.DownmixAndRecognizeMultipleSpeakers
-                    || SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.RecognizeMultipleSpeakersInSingleChannel,
+                EnableSpeakerDiarization = IsSpeakerDiarizationEnabled,
                 DiarizationSpeakerCount = SelectedSpeakerCount.Count,
             };
         }

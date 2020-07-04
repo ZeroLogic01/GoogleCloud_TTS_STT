@@ -163,11 +163,12 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
 
             config.AudioChannelCount = googleSpeechConfig.AudioChannelCount;
 
-            if (googleSpeechConfig.EnableSeparateRecognitionPerChannel)
-            {
-                config.EnableSeparateRecognitionPerChannel = googleSpeechConfig.EnableSeparateRecognitionPerChannel;
-            }
-            else if (googleSpeechConfig.EnableSpeakerDiarization)
+            //if (googleSpeechConfig.EnableSeparateRecognitionPerChannel)
+            //{
+            //    config.EnableSeparateRecognitionPerChannel = googleSpeechConfig.EnableSeparateRecognitionPerChannel;
+            //}
+            //else 
+            if (googleSpeechConfig.EnableSpeakerDiarization)
             {
                 config.DiarizationConfig = new SpeakerDiarizationConfig()
                 {
