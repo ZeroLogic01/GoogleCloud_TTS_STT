@@ -90,7 +90,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
                     Count=5
                 },
                 new Speaker(){
-                    Name="6 Speaker",
+                    Name="6 Speakers",
                     Count=6
                 }
             };
