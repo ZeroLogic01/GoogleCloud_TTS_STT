@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Storage.v1.Data;
@@ -194,6 +195,56 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
                 Type = type,
                 Value = value
             });
+        }
+
+        public async Task DeleteObject(IEnumerable<string> objectNames, string bucketName = DefaultBucketName, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    var storage = StorageClient.Create();
+                    foreach (string objectName in objectNames)
+                    {
+                        UpdateStatus($"Deleting {objectName} from the cloud...");
+                        await storage.DeleteObjectAsync(bucketName, objectName, null, cancellationToken);
+                        Console.WriteLine($"Deleted {objectName}.");
+                    }
+                });
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        /// <summary>
+        /// Deletes all objects from the bucket.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="bucketName"></param>
+        /// <returns></returns>
+        public static async Task ClearBucketObjects(CancellationToken cancellationToken, string bucketName = DefaultBucketName)
+        {
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    using (var client = StorageClient.Create())
+                    {
+                        var bucket = await client.GetBucketAsync(DefaultBucketName, null, cancellationToken);
+                        var objects = client.ListObjects(bucketName, string.Empty);
+                        Console.WriteLine($"Total number of files in bucket: {objects.Count()}");
+                        // List objects
+                        foreach (var obj in objects)
+                        {
+                            Console.WriteLine(obj.Name);
+                            await client.DeleteObjectAsync(bucketName, obj.Name, null, cancellationToken);
+                        }
+                    }
+                }, cancellationToken);
+            }
+            catch (TaskCanceledException) { return; }
         }
 
         #endregion

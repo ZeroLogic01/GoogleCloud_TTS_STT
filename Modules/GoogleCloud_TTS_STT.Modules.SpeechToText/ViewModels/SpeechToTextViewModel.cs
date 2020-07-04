@@ -1,4 +1,5 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using FlacLibSharp;
+using Google.Protobuf.WellKnownTypes;
 using GoogleCloud_TTS_STT.Core;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business.Interfaces;
 using GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business.Models;
@@ -278,7 +279,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
             SelectedLangauge = SupportedLangauges.FirstOrDefault(lang => lang.LanguageCode.Equals("en-GB"));
             SelectedTranscriptionModel = SupportedTranscriptionModels.FirstOrDefault(model => model.ModelName.Equals("Default", StringComparison.OrdinalIgnoreCase));
-            SelectedSpeakerDiarization = SpeakerDiarizationList.FirstOrDefault(x => x.Value == SpeakerDiarizationEnum.Off);
+            SelectedSpeakerDiarization = SpeakerDiarizationList.FirstOrDefault(x => x.Value == SpeakerDiarizationEnum.DownmixAndRecognizeMultipleSpeakers);
             SelectedSpeakerCount = SpeakersList.FirstOrDefault(x => x.Count == 2);
 
 
@@ -334,26 +335,16 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             {
                 await Update("Performing Speech to Text...");
 
-                ISpeechConfig speechConfig = new GoogeSpeechConfig()
-                {
-                    LanguageCode = SelectedLangauge.LanguageCode,
-                    TranscriptionModel = SelectedTranscriptionModel.ModelValue,
-                    AudioChannelCount = 1,
-                    EnableAutomaticPunctuation = IsAutomaticPunctuationEnabled,
-                    EnableSpeakerDiarization = SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.DownmixAndRecognizeMultipleSpeakers
-                    || SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.RecognizeMultipleSpeakersInSingleChannel,
-                    EnableSeparateRecognitionPerChannel = SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.Recognize1SpeakerPerChannel,
-                    DiarizationSpeakerCount = SelectedSpeakerCount.Count,
-                };
+                GoogeSpeechConfig speechConfig = GetGoogeSpeechConfig();
 
                 string uri = string.Empty;
 
                 if (IsLocalStorageEnabled)
                 {
                     string audioFile = string.Empty;
-                    // get the file extension to see if it's a file other than flac/wav as we don't need to convert flac/wav file
+                    // get the file extension to see if it's a file other than flac as we don't need to convert flac file
                     var fileExtension = Path.GetExtension(SourceFile);
-                    if (!fileExtension.Equals(".flac") && !fileExtension.Equals(".wav"))
+                    if (!fileExtension.Equals(".flac"))
                     {
                         audioFile = await GerConvertedFilePath(SourceFile, _cts.Token);
                     }
@@ -362,9 +353,23 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                         audioFile = SourceFile;
                     }
 
+
                     if (!string.IsNullOrWhiteSpace(audioFile))
                     {
-                        uri = await UploadAudioFileToCloudAsync(audioFile, _cts.Token);
+                        (int durationInSeconds, int channelCount) = GetFlacFilMetaData(audioFile);
+                        speechConfig.AudioChannelCount = channelCount;
+
+                        if (durationInSeconds < 60)
+                        {
+                            await Update("Transcribing");
+                            await _googleTranscriber.TranscribeShortAudioFile(audioFile, speechConfig, _cts.Token);
+                            await Update("Transcription completed");
+                        }
+                        else
+                        {
+                            uri = await UploadAudioFileToCloudAsync(audioFile, _cts.Token);
+                        }
+
                     }
 
                 }
@@ -375,9 +380,19 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
                 if (!string.IsNullOrWhiteSpace(uri))
                 {
-                    await Update("Transcribing");
+                    await Update("Transcribing...");
                     await _googleTranscriber.TranscribeLongAudioFile(uri, speechConfig, _cts.Token);
                     await Update("Transcription completed");
+                    
+                    if (IsLocalStorageEnabled)
+                    {
+                        List<string> objectNames = new List<string>
+                        {
+                              uri.Split('/').Last()
+                        };
+                        await _cloudStorage.DeleteObject(objectNames);
+
+                    }
                 }
             }
             catch (TaskCanceledException) { }
@@ -417,6 +432,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             try
             {
                 IsCancelButtonEnabled = false;
+                IsTranscriptionJobRunning = false;
 
                 CancelSpeechToTextCommand.RaiseCanExecuteChanged();
 
@@ -435,7 +451,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                 _cts?.Dispose(); // Clean up old token source....
                 _cts = new CancellationTokenSource(); // "Reset" the cancellation token source...
 
-                IsTranscriptionJobRunning = false;
 
                 await Task.Delay(TimeSpan.FromSeconds(20));
             }
@@ -447,6 +462,28 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
 
         #endregion
 
+        private GoogeSpeechConfig GetGoogeSpeechConfig()
+        {
+            return new GoogeSpeechConfig()
+            {
+                LanguageCode = SelectedLangauge.LanguageCode,
+                TranscriptionModel = SelectedTranscriptionModel.ModelValue,
+                EnableSeparateRecognitionPerChannel = SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.Recognize1SpeakerPerChannel,
+                EnableAutomaticPunctuation = IsAutomaticPunctuationEnabled,
+                EnableSpeakerDiarization = SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.DownmixAndRecognizeMultipleSpeakers
+                    || SelectedSpeakerDiarization.Value == SpeakerDiarizationEnum.RecognizeMultipleSpeakersInSingleChannel,
+                DiarizationSpeakerCount = SelectedSpeakerCount.Count,
+            };
+        }
+
+        private (int durationInSeconds, int channelCount) GetFlacFilMetaData(string sourceFile)
+        {
+            using (FlacFile file = new FlacFile(sourceFile))
+            {
+                Console.WriteLine(file.StreamInfo.Channels);
+                return (durationInSeconds: file.StreamInfo.Duration, channelCount: file.StreamInfo.Channels);
+            }
+        }
 
         private async Task<string> GerConvertedFilePath(string sourceFile, CancellationToken cancellationToken)
         {

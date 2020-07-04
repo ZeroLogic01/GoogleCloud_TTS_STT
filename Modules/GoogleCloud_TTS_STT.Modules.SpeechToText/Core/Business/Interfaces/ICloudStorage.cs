@@ -12,5 +12,8 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business.Interfaces
         Task<bool> UploadAsync(string filePath, string mimeType, CancellationToken cancellationToken = default);
 
         string GetFileUri(string fileName);
+
+        Task DeleteObject(IEnumerable<string> objectNames, string bucketName = default, CancellationToken cancellationToken = default);
+
     }
 }
