@@ -69,6 +69,10 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Helpers
         {
             List<Speaker> list = new List<Speaker>()
             {
+                 new Speaker(){
+                    Name="Auto Detect",
+                    Count=-1
+                },
                 new Speaker(){
                     Name="2 Speakers",
                     Count=2

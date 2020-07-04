@@ -171,10 +171,13 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.Core.Business
             {
                 config.DiarizationConfig = new SpeakerDiarizationConfig()
                 {
-                    EnableSpeakerDiarization = googleSpeechConfig.EnableSpeakerDiarization//,
-                    //MinSpeakerCount = googleSpeechConfig.DiarizationSpeakerCount,
-                    //MaxSpeakerCount = googleSpeechConfig.DiarizationSpeakerCount
+                    EnableSpeakerDiarization = googleSpeechConfig.EnableSpeakerDiarization
                 };
+                if (googleSpeechConfig.DiarizationSpeakerCount != -1)
+                {
+                    config.DiarizationConfig.MinSpeakerCount = googleSpeechConfig.DiarizationSpeakerCount;
+                    config.DiarizationConfig.MaxSpeakerCount = googleSpeechConfig.DiarizationSpeakerCount;
+                }
             }
             return config;
         }

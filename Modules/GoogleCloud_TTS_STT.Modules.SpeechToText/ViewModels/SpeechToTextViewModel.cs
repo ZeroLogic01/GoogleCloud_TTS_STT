@@ -280,7 +280,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             SelectedLangauge = SupportedLangauges.FirstOrDefault(lang => lang.LanguageCode.Equals("en-GB"));
             SelectedTranscriptionModel = SupportedTranscriptionModels.FirstOrDefault(model => model.ModelName.Equals("Default", StringComparison.OrdinalIgnoreCase));
             SelectedSpeakerDiarization = SpeakerDiarizationList.FirstOrDefault(x => x.Value == SpeakerDiarizationEnum.DownmixAndRecognizeMultipleSpeakers);
-            SelectedSpeakerCount = SpeakersList.FirstOrDefault(x => x.Count == 2);
+            SelectedSpeakerCount = SpeakersList.FirstOrDefault(x => x.Count == -1);
 
 
             ChooseFileCommand = new DelegateCommand(ChooseSourceFile);
@@ -290,8 +290,6 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
             ClosingCommand = new DelegateCommand(async () => await Closing());
             if (ClosingCommand != null) /* order is important here*/
                 applicationCommands.WindowClosingCommand.RegisterCommand(ClosingCommand);
-
-
 
         }
 
@@ -383,7 +381,7 @@ namespace GoogleCloud_TTS_STT.Modules.SpeechToText.ViewModels
                     await Update("Transcribing...");
                     await _googleTranscriber.TranscribeLongAudioFile(uri, speechConfig, _cts.Token);
                     await Update("Transcription completed");
-                    
+
                     if (IsLocalStorageEnabled)
                     {
                         List<string> objectNames = new List<string>
