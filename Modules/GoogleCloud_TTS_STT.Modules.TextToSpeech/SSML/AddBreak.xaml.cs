@@ -35,5 +35,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.SSML
         {
             this.Close(false);
         }
+
     }
 }

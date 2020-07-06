@@ -171,7 +171,7 @@
         <Button Grid.Row="6" Content="{Binding ButtonContent}" Command="{Binding TtsCommand}" 
                IsEnabled="{Binding IsTextToSpeechButtonEnabled}" 
                 HorizontalAlignment="Right" Width="120"
-                Margin="0 5"/>
+                Margin="0 5" />
 
 
         <Grid Grid.Row="7" Margin="-14 5 -14 0" HorizontalAlignment="Stretch" 
