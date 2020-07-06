@@ -1,5 +1,7 @@
-﻿using GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels;
+﻿using GoogleCloud_TTS_STT.Modules.TextToSpeech.SSML;
+using GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels;
 using MahApps.Metro.Controls.Dialogs;
+using MahApps.Metro.SimpleChildWindow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +28,11 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Views
         public MainView()
         {
             InitializeComponent();
+        }
+        private async void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            await Application.Current.MainWindow.ShowChildWindowAsync<bool>(new AddBreak() { IsModal = true, AllowMove = true }, ChildWindowManager.OverlayFillBehavior.FullWindow);
+
         }
     }
 }
