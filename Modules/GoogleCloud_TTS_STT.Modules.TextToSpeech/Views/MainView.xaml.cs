@@ -26,14 +26,20 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Views
 
         private void AddSsmlBreak(string tagContent)
         {
-            TextBox_TTS.Text = TextBox_TTS.Text.Insert(TextBox_TTS.CaretIndex, $" {tagContent} ");
-            TextBox_TTS.Text = TextBox_TTS.Text.Replace("  ", " ");
+            if (TextBox_TTS.Text.Length > 0)
+            {
+                TextBox_TTS.Text = TextBox_TTS.Text.Insert(TextBox_TTS.CaretIndex, $" {tagContent} ");
+                TextBox_TTS.Text = TextBox_TTS.Text.Replace("  ", " ");
+            }
+            else
+            {
+                TextBox_TTS.Text = $"{tagContent} ";
+            }
         }
 
         private async void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
-            await ((MetroWindow)Window.GetWindow(this)).ShowChildWindowAsync<bool>(new BreakTag() { IsModal = true, AllowMove = true }, ChildWindowManager.OverlayFillBehavior.WindowContent);
-
+            //await ((MetroWindow)Window.GetWindow(this)).ShowChildWindowAsync<bool>(new BreakTag() { IsModal = true, AllowMove = true }, ChildWindowManager.OverlayFillBehavior.WindowContent);
         }
     }
 }

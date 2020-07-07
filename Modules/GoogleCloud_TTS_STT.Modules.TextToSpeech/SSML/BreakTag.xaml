@@ -70,7 +70,7 @@
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
 
-            <Controls:NumericUpDown Grid.Column="0" Minimum="0.1" 
+            <Controls:NumericUpDown Grid.Column="0" Minimum="0" 
                                     Value="{Binding Length}"
                                     Controls:ValidationHelper.ShowValidationErrorOnMouseOver="True"/>
 

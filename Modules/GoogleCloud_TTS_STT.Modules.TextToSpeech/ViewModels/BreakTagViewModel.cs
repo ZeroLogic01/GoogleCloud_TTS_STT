@@ -79,7 +79,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         #endregion
 
 
-        private double _length;
+        private double _length = 1;
         public double Length
         {
             get { return _length; }

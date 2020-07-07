@@ -6,7 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-             mc:Ignorable="d" Loaded="UserControl_Loaded"
+             mc:Ignorable="d"
              d:DesignHeight="500" d:DesignWidth="500">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -21,6 +21,13 @@
 
             </ResourceDictionary.MergedDictionaries>
 
+            <ContextMenu x:Key="TextBoxContextMenu" Background="White">
+                <MenuItem Command="ApplicationCommands.Copy" />
+                <MenuItem Command="ApplicationCommands.Cut" />
+                <MenuItem Command="ApplicationCommands.Paste" />
+                <MenuItem  Header="SSML Break" Command="{Binding SsmlBreakCommand}"/>
+                <MenuItem  Header="Emphasize" Command="{Binding SsmlBreakCommand}"/>
+            </ContextMenu>
 
         </ResourceDictionary>
     </UserControl.Resources>
@@ -62,13 +69,33 @@
                  Grid.Row="1" 
                  Text="{Binding TextToSpeech,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged}"
                  AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Auto"/>
+                 VerticalScrollBarVisibility="Auto">
+            <TextBox.Style>
+                <Style TargetType="{x:Type TextBox}">
+                    <Setter Property="ContextMenu" Value="{StaticResource MahApps.TextBox.ContextMenu}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsTextOptionSelected}" Value="false">
+                            <Setter Property="ContextMenu" Value="{StaticResource TextBoxContextMenu}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBox.Style>
+        </TextBox>
+        <DockPanel Grid.Row="2" >
 
-        <Label Grid.Row="2" Content="Maximum number of characters allowed: 5000" 
+            <Label   Content="Maximum number of characters allowed: 5000" 
                Foreground="{DynamicResource MahApps.Brushes.Gray3}"
-                HorizontalAlignment="Right" VerticalAlignment="Center" 
-                FontSize="11" Margin="0 0 0 10"/>
+                HorizontalAlignment="Left" VerticalAlignment="Center" 
+                FontSize="11" Margin="-4 0 0 10"/>
 
+            <UniformGrid>
+                <Controls:ToggleSwitch Grid.Row="2" HorizontalAlignment="Right"
+                                OffContent="ssml"
+                                OnContent="text"
+                                FlowDirection="RightToLeft"
+                                IsOn="{Binding Path=IsTextOptionSelected}"/>
+            </UniformGrid>
+        </DockPanel>
 
         <Grid Grid.Row="3" Margin="0 5">
             <Grid.ColumnDefinitions>

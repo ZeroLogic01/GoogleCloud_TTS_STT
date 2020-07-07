@@ -2,7 +2,10 @@
 using GoogleCloud_TTS_STT.Core;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
+using GoogleCloud_TTS_STT.Modules.TextToSpeech.SSML;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Static;
+using MahApps.Metro.Controls;
+using MahApps.Metro.SimpleChildWindow;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
@@ -16,6 +19,17 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
     internal class MainViewModel : BindableBase
     {
         #region Properties
+
+        private bool _isTextOptionSelected = true;
+        public bool IsTextOptionSelected
+        {
+            get { return _isTextOptionSelected; }
+            set
+            {
+                SetProperty(ref _isTextOptionSelected, value);
+            }
+        }
+
 
         private string _textToSpeech;
 
@@ -183,6 +197,13 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         public DelegateCommand TtsCommand { get; set; }
         public DelegateCommand ReloadComboboxesCommand { get; set; }
 
+        #region SSML Commands
+
+        public DelegateCommand SsmlBreakCommand { get; set; }
+
+
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -192,6 +213,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
             TtsCommand = new DelegateCommand(PerformTextToSpeech, CanTextToSpeech);
             ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
+            SsmlBreakCommand = new DelegateCommand(ExecuteSsmlBreak);
 
             _selectedAudioProfile = AudioProfiles.FirstOrDefault(x => x.Equals("Default", StringComparison.OrdinalIgnoreCase));
             _selectedAudioFormat = OutputAudioFormats.FirstOrDefault(x => x.AudioEncoding == AudioEncoding.Mp3);
@@ -201,6 +223,11 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
                 NoInternetConnectionPanelVisibility = Visibility.Visible;
             }
             LoadVoiceData().ConfigureAwait(false);
+        }
+
+        private async void ExecuteSsmlBreak()
+        {
+            await Application.Current.MainWindow.ShowChildWindowAsync<bool>(new BreakTag() { IsModal = true, AllowMove = true }, ChildWindowManager.OverlayFillBehavior.WindowContent);
         }
 
         private bool CanTextToSpeech()
