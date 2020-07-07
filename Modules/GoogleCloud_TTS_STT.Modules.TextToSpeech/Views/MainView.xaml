@@ -55,14 +55,15 @@
 
         </Grid>
 
-        <TextBox Controls:TextBoxHelper.Watermark="Text to speech"
+        <TextBox x:Name="TextBox_TTS"
+            Controls:TextBoxHelper.Watermark="Text to speech"
                  Controls:TextBoxHelper.UseFloatingWatermark="True"
                  TextWrapping="Wrap" FlowDirection="LeftToRight" MaxLength="5000"
                  Grid.Row="1" 
                  Text="{Binding TextToSpeech,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged}"
                  AcceptsReturn="True"
                  VerticalScrollBarVisibility="Auto"/>
-        
+
         <Label Grid.Row="2" Content="Maximum number of characters allowed: 5000" 
                Foreground="{DynamicResource MahApps.Brushes.Gray3}"
                 HorizontalAlignment="Right" VerticalAlignment="Center" 

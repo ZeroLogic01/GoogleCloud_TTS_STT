@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.SimpleChildWindow;
+﻿using GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels;
+using MahApps.Metro.SimpleChildWindow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,21 +20,27 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.SSML
     /// <summary>
     /// Interaction logic for AddBreak.xaml
     /// </summary>
-    public partial class AddBreak : ChildWindow
+    public partial class BreakTag : ChildWindow
     {
-        public AddBreak()
+        public BreakTag()
         {
             InitializeComponent();
         }
 
         private void OkButtonOnClick(object sender, RoutedEventArgs e)
         {
-            this.Close(true);
+            var viewModel = (BreakTagViewModel)DataContext;
+            viewModel.SaveBeforeClosing = true;
+
+            this.Close(CloseReason.Apply, true);
         }
 
         private void CloseSec_OnClick(object sender, RoutedEventArgs e)
         {
-            this.Close(false);
+            var viewModel = (BreakTagViewModel)DataContext;
+            viewModel.SaveBeforeClosing = false;
+
+            this.Close(CloseReason.Close, false);
         }
 
     }

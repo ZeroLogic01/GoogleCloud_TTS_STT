@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Enums
 {
-    /// <summary>
-    /// Voice Types
-    /// </summary>
-    internal enum Gender
+    public enum TimeAttributeType
     {
-        Male = 1,
-        Female = 2
+        [Description(@"Seconds")]
+        s = 0,
+
+        [Description(@"Milliseconds")]
+        ms = 1
     }
 }
