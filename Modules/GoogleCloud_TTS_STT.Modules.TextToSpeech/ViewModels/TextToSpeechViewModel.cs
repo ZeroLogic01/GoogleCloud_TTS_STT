@@ -1,10 +1,11 @@
-﻿using Google.Cloud.TextToSpeech.V1;
+﻿using EnumsNET;
+using Google.Cloud.TextToSpeech.V1;
 using GoogleCloud_TTS_STT.Core;
+using GoogleCloud_TTS_STT.Modules.TextToSpeech.Enums;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Models;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.SSML;
 using GoogleCloud_TTS_STT.Modules.TextToSpeech.Static;
-using MahApps.Metro.Controls;
 using MahApps.Metro.SimpleChildWindow;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -16,7 +17,7 @@ using System.Windows;
 
 namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 {
-    internal class MainViewModel : BindableBase
+    internal class TextToSpeechViewModel : BindableBase
     {
         #region Properties
 
@@ -31,19 +32,47 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         }
 
 
-        private string _textToSpeech;
+
+        private string _text;
 
         /// <summary>
         /// The text to be converted to speech
         /// </summary>
-        public string TextToSpeech
+        public string Text
         {
-            get { return _textToSpeech; }
+            get { return _text; }
             set
             {
-                SetProperty(ref _textToSpeech, value);
+                SetProperty(ref _text, value);
                 IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(value);
                 TtsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private string _ssml;
+
+        /// <summary>
+        /// The SSML to be converted to speech
+        /// </summary>
+        public string SSML
+        {
+            get { return _ssml; }
+            set
+            {
+                SetProperty(ref _ssml, value);
+                IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(value);
+                TtsCommand.RaiseCanExecuteChanged();
+            }
+        }
+
+        private string _selectedText = string.Empty;
+        public string SelectedText
+        {
+            get { return _selectedText; }
+            set
+            {
+                SetProperty(ref _selectedText, value);
+                SsmlEmphasizeCommand.RaiseCanExecuteChanged();
             }
         }
 
@@ -200,6 +229,9 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         #region SSML Commands
 
         public DelegateCommand SsmlBreakCommand { get; set; }
+        public DelegateCommand<string> SsmlEmphasizeCommand { get; set; }
+
+
 
 
         #endregion
@@ -208,12 +240,13 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         #region Constructor
 
-        public MainViewModel()
+        public TextToSpeechViewModel()
         {
 
-            TtsCommand = new DelegateCommand(PerformTextToSpeech, CanTextToSpeech);
+            TtsCommand = new DelegateCommand(ExecuteTextToSpeech, CanExecuteTextToSpeech);
             ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
             SsmlBreakCommand = new DelegateCommand(ExecuteSsmlBreak);
+            SsmlEmphasizeCommand = new DelegateCommand<string>(ExecuteSsmlExphasize, CanExecuteSsmlExphasize);
 
             _selectedAudioProfile = AudioProfiles.FirstOrDefault(x => x.Equals("Default", StringComparison.OrdinalIgnoreCase));
             _selectedAudioFormat = OutputAudioFormats.FirstOrDefault(x => x.AudioEncoding == AudioEncoding.Mp3);
@@ -223,17 +256,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
                 NoInternetConnectionPanelVisibility = Visibility.Visible;
             }
             LoadVoiceData().ConfigureAwait(false);
-        }
-
-        private async void ExecuteSsmlBreak()
-        {
-            await Application.Current.MainWindow.ShowChildWindowAsync<bool>(new BreakTag() { IsModal = true, AllowMove = true }, ChildWindowManager.OverlayFillBehavior.WindowContent);
-        }
-
-        private bool CanTextToSpeech()
-        {
-            return IsTextToSpeechButtonEnabled && !string.IsNullOrWhiteSpace(TextToSpeech) && SelectedLangauge != null
-                   && !string.IsNullOrWhiteSpace(SelectedGender) && !string.IsNullOrWhiteSpace(SelectedVoice);
         }
 
         #endregion
@@ -325,22 +347,33 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             LoadVoiceData().ConfigureAwait(false);
         }
 
-        private async void PerformTextToSpeech()
+        private async void ExecuteTextToSpeech()
         {
             IsTextToSpeechButtonEnabled = false;
             TtsCommand.RaiseCanExecuteChanged();
 
             try
             {
-                await UpdateApplicationStatus("Performing text to speech", .5);
+                SynthesisType synthesisType;
+                string inputToBeTranscribed = string.Empty;
+                if (IsTextOptionSelected)
+                {
+                    synthesisType = SynthesisType.TextToSpeech;
+                    inputToBeTranscribed = Text;
+                }
+                else
+                {
+                    synthesisType = SynthesisType.SSMLToSpeech;
+                    inputToBeTranscribed = $"<speak>{SSML}<speak>";
+                }
+
+                await UpdateApplicationStatus($"Performing {synthesisType.AsString(EnumFormat.Description)}", .5);
                 SsmlVoiceGender gender = (SsmlVoiceGender)Enum.Parse(typeof(SsmlVoiceGender), SelectedGender);
 
-                await ApiHelper.SynthesizeTextAndSaveToFile(text: TextToSpeech, languageCode: SelectedLangauge.LanguageCode,
+                await ApiHelper.SynthesizeTextAndSaveToFile(text: inputToBeTranscribed, languageCode: SelectedLangauge.LanguageCode,
                        gender: gender, voiceName: SelectedVoice, audioEncoding: SelectedAudioFormat.AudioEncoding,
-                       speakingRate: Speed, pitch: Pitch, effectProfileId: SelectedAudioProfile);
+                       speakingRate: Speed, pitch: Pitch, effectProfileId: SelectedAudioProfile, synthesisType);
 
-                //var naturalSampleRateHertz = AvailableVoices.Where(x => x.Name.Equals(SelectedVoice))
-                //   .Select(x => x.NaturalSampleRateHertz).FirstOrDefault();
                 await UpdateApplicationStatus("Done", .5);
             }
             catch (Exception e)
@@ -348,9 +381,59 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
                 await AppHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
             }
 
-            IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(TextToSpeech);
+            IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(Text);
             TtsCommand.RaiseCanExecuteChanged();
         }
+
+
+        private bool CanExecuteTextToSpeech()
+        {
+            bool isInputEmpty;
+            if (IsTextOptionSelected)
+            {
+                isInputEmpty = string.IsNullOrWhiteSpace(Text);
+            }
+            else
+            {
+                isInputEmpty = string.IsNullOrWhiteSpace(SSML);
+            }
+
+            return IsTextToSpeechButtonEnabled && !isInputEmpty && SelectedLangauge != null
+                   && !string.IsNullOrWhiteSpace(SelectedGender) && !string.IsNullOrWhiteSpace(SelectedVoice);
+        }
+
+
+        private async void ExecuteSsmlBreak()
+        {
+            await Application.Current.MainWindow.ShowChildWindowAsync<bool>(new BreakTag() { IsModal = true, AllowMove = true }, ChildWindowManager.OverlayFillBehavior.WindowContent);
+        }
+
+
+        private async void ExecuteSsmlExphasize(string level)
+        {
+            string emphasizedText = $"<emphasis level=\"{level}\">{SelectedText}</emphasis>";
+
+            int totalLenghtWithoutSelectedText = SSML.Length - SelectedText.Length;
+
+            // insert only if the sum of totalLenghtWithoutSelectedText & emphasizedText characters is less than equals to 
+            // MaximumNumberOfSsmlCharactersAllowed_TTS
+            if (totalLenghtWithoutSelectedText + emphasizedText.Length <= AppConstants.MaximumNumberOfSsmlCharactersAllowed_TTS)
+            {
+                SelectedText = emphasizedText;
+            }
+            else
+            {
+                await AppHelper.ShowMessage("Maximum length will be exceeded!", "Cannot insert a new emphasis tag because the length of remaining" +
+                    " characters allowed is less than the number of characters required for emphasis tag.") ;
+            }
+        }
+        private bool CanExecuteSsmlExphasize(string arg)
+        {
+            return !string.IsNullOrWhiteSpace(_selectedText);
+        }
+
+
+
 
         #endregion
 

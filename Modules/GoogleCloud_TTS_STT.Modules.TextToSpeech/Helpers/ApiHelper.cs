@@ -1,6 +1,8 @@
 ﻿using Google.Cloud.TextToSpeech.V1;
 using Google.Protobuf;
+using GoogleCloud_TTS_STT.Modules.TextToSpeech.Enums;
 using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -92,10 +94,19 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
 
 
         internal static async Task SynthesizeTextAndSaveToFile(string text, string languageCode, SsmlVoiceGender gender,
-           string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId)
+           string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId,
+           SynthesisType synthesisType)
         {
-            var audioBytes = await SynthesizeText(text, languageCode, gender, voiceName, audioEncoding, speakingRate, pitch, effectProfileId);
+            ByteString audioBytes;
+            if (synthesisType == SynthesisType.TextToSpeech)
+            {
+                audioBytes = await SynthesizeText(text, languageCode, gender, voiceName, audioEncoding, speakingRate, pitch, effectProfileId);
+            }
+            else
+            {
+                audioBytes = await SynthesizeSSML(text, languageCode, gender, voiceName, audioEncoding, speakingRate, pitch, effectProfileId);
 
+            }
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = GetSaveFileDialogFilter(audioEncoding)
@@ -130,6 +141,38 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
 
         }
 
+        private static async Task<ByteString> SynthesizeSSML(string ssml, string languageCode, SsmlVoiceGender gender, string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId)
+        {
+            TextToSpeechClient client = await TextToSpeechClient.CreateAsync();
+            var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
+            {
+                Input = new SynthesisInput
+                {
+                    Ssml = ssml
+                },
+                // Note: voices can also be specified by name
+                Voice = new VoiceSelectionParams
+                {
+                    LanguageCode = languageCode,
+                    SsmlGender = gender,
+                    Name = voiceName
+                },
+                AudioConfig = effectProfileId.Equals("Default") ? new AudioConfig()
+                {
+                    AudioEncoding = audioEncoding,
+                    SpeakingRate = speakingRate,
+                    Pitch = pitch
+                } :
+                new AudioConfig()
+                {
+                    AudioEncoding = audioEncoding,
+                    SpeakingRate = speakingRate,
+                    Pitch = pitch,
+                    EffectsProfileId = { effectProfileId }
+                }
+            });
+            return response.AudioContent;
+        }
 
         /// <summary>
         /// Creates audio from the text input.
@@ -167,10 +210,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
                     EffectsProfileId = { effectProfileId }
                 }
             });
-
             return response.AudioContent;
-
-
         }
 
     }
