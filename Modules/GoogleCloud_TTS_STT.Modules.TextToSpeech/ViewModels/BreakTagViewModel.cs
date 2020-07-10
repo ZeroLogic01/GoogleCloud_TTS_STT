@@ -94,17 +94,10 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             get
             {
                 Enum.TryParse(SelectedAttribute, out BreakTagAttribute breakTagAttribute);
-                string content;
-                switch (breakTagAttribute)
-                {
-                    case BreakTagAttribute.Time:
-                        content = $"time=\"{Length}{SelectedTimeAttributeTypes}\"";
-                        break;
-                    case BreakTagAttribute.Strength:
-                    default:
-                        content = $"strength=\"{SelectedStrength}\"";
-                        break;
-                }
+                string content = breakTagAttribute == BreakTagAttribute.Time
+                    ? $"time=\"{Length}{SelectedTimeAttributeTypes}\""
+                    : $"strength=\"{SelectedStrength}\"";
+               
                 return $"<break {content}/>";
             }
         }
@@ -165,7 +158,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         {
             if (obj is bool saveBeforeClosing && saveBeforeClosing)
             {
-                Console.WriteLine(BreakTagContent);
+               // Console.WriteLine(BreakTagContent);
                 _eventAggregator.GetEvent<SsmlBreakEvent>().Publish(BreakTagContent);
             }
         }

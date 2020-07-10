@@ -9,6 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Deployment;
 
 namespace MainUI.ViewModels
 {
@@ -41,16 +42,35 @@ namespace MainUI.ViewModels
 
         public MainWindowViewModel(IApplicationCommands applicationCommands)
         {
+            var version = GetRunningVersion();
+            if (version != null)
+            {
+                Title = $"Balconette’s Speech Services {version.Major}.{version.Minor}";
+
+            }
+            //GetRunningVersion();
             ApplicationCommands = applicationCommands;
 
             EnvironmentVariableCommand = new DelegateCommand(ChangeEnvironmentVariable);
+        }
+
+        private Version GetRunningVersion()
+        {
+            try
+            {
+                return Assembly.GetExecutingAssembly().GetName().Version;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private async void ChangeEnvironmentVariable()
         {
             var result = await DialogManager.ShowMessageAsync(Application.Current.MainWindow as MetroWindow, "Are you sure?",
                 $"You are about to set the user environment variable GOOGLE_APPLICATION_CREDENTIALS for the current user " +
-                $"{System.Security.Principal.WindowsIdentity.GetCurrent().Name}. This change will take effect the next time you launch {Assembly.GetExecutingAssembly().GetName().Name}. The App will shutdown.",
+                $"{System.Security.Principal.WindowsIdentity.GetCurrent().Name}. This change will take effect the next time you launch {Assembly.GetExecutingAssembly().GetName().Name}. The App might shut down.",
                      MessageDialogStyle.AffirmativeAndNegative);
 
             if (result == MessageDialogResult.Affirmative)

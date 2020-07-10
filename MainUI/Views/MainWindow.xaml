@@ -27,7 +27,7 @@
     </Controls:MetroWindow.IconTemplate>
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
-            <Button Command="{Binding EnvironmentVariableCommand}" 
+            <Button Command="{Binding EnvironmentVariableCommand}" IsTabStop="False"
                     Content="Set Environment Variable"
                     ToolTip="Set the environment variable GOOGLE_APPLICATION_CREDENTIALS to the path of the JSON file that contains your service account key.">
                 <Button.ContentTemplate>
@@ -49,7 +49,7 @@
     </i:Interaction.Triggers>
 
 
-    <Grid Margin="6 6 6 0">
+    <Grid Margin="6 6 6 0" Focusable="False">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -59,14 +59,14 @@
 
             <!--Google Text to Speech Region-->
             <Controls:MetroTabItem Header="Text to Speech">
-                <ContentControl IsTabStop="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.TextToSpeechRegion}}" 
+                <ContentControl IsTabStop="False" Focusable="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.TextToSpeechRegion}}" 
                                 Margin="8 8 8 0"/>
             </Controls:MetroTabItem>
 
 
             <!--Google Speech to Text Region-->
             <Controls:MetroTabItem Header="Speech to Text">
-                <ContentControl IsTabStop="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.SpeechToTextRegion}}"
+                <ContentControl IsTabStop="False" Focusable="False" prism:RegionManager.RegionName="{Binding Source={x:Static core:RegionNames.SpeechToTextRegion}}"
                                  Margin="8 8 8 0"/>
             </Controls:MetroTabItem>
 

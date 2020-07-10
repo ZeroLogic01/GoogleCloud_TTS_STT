@@ -97,16 +97,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
            string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId,
            SynthesisType synthesisType)
         {
-            ByteString audioBytes;
-            if (synthesisType == SynthesisType.TextToSpeech)
-            {
-                audioBytes = await SynthesizeText(text, languageCode, gender, voiceName, audioEncoding, speakingRate, pitch, effectProfileId);
-            }
-            else
-            {
-                audioBytes = await SynthesizeSSML(text, languageCode, gender, voiceName, audioEncoding, speakingRate, pitch, effectProfileId);
-
-            }
+            
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
                 Filter = GetSaveFileDialogFilter(audioEncoding)
@@ -127,6 +118,11 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
             {
                 return;
             }
+            // escape quotes as recommended
+            text = text.Replace("\"", "\\\"");
+
+            ByteString audioBytes = await Synthesize(text, languageCode, gender, voiceName, audioEncoding, speakingRate,
+                pitch, effectProfileId, synthesisType);
 
             using (Stream output = File.Create(saveFileDialog.FileName))
             {
@@ -141,54 +137,26 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
 
         }
 
-        private static async Task<ByteString> SynthesizeSSML(string ssml, string languageCode, SsmlVoiceGender gender, string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId)
-        {
-            TextToSpeechClient client = await TextToSpeechClient.CreateAsync();
-            var response = client.SynthesizeSpeech(new SynthesizeSpeechRequest
-            {
-                Input = new SynthesisInput
-                {
-                    Ssml = ssml
-                },
-                // Note: voices can also be specified by name
-                Voice = new VoiceSelectionParams
-                {
-                    LanguageCode = languageCode,
-                    SsmlGender = gender,
-                    Name = voiceName
-                },
-                AudioConfig = effectProfileId.Equals("Default") ? new AudioConfig()
-                {
-                    AudioEncoding = audioEncoding,
-                    SpeakingRate = speakingRate,
-                    Pitch = pitch
-                } :
-                new AudioConfig()
-                {
-                    AudioEncoding = audioEncoding,
-                    SpeakingRate = speakingRate,
-                    Pitch = pitch,
-                    EffectsProfileId = { effectProfileId }
-                }
-            });
-            return response.AudioContent;
-        }
-
         /// <summary>
         /// Creates audio from the text input.
         /// </summary>
-        internal static async Task<ByteString> SynthesizeText(string text, string languageCode, SsmlVoiceGender gender,
-        string voiceName, AudioEncoding audioEncoding, float speakingRate, float pitch, string effectProfileId)
+        private static async Task<ByteString> Synthesize(string text, string languageCode, SsmlVoiceGender gender, string voiceName, AudioEncoding audioEncoding,
+            float speakingRate, float pitch, string effectProfileId, SynthesisType synthesisType)
         {
+            var synthesisInput = new SynthesisInput();
+            if (synthesisType == SynthesisType.TextToSpeech)
+            {
+                synthesisInput.Text = text;
+            }
+            else
+            {
+                synthesisInput.Ssml = text;
+            }
 
             TextToSpeechClient client = await TextToSpeechClient.CreateAsync();
-
             var response = await client.SynthesizeSpeechAsync(new SynthesizeSpeechRequest
             {
-                Input = new SynthesisInput
-                {
-                    Text = text
-                },
+                Input = synthesisInput,
                 // Note: voices can also be specified by name
                 Voice = new VoiceSelectionParams
                 {
@@ -212,6 +180,8 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Helpers
             });
             return response.AudioContent;
         }
+
+
 
     }
 }

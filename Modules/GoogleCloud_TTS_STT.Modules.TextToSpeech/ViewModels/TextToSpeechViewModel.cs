@@ -231,9 +231,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
         public DelegateCommand SsmlBreakCommand { get; set; }
         public DelegateCommand<string> SsmlEmphasizeCommand { get; set; }
 
-
-
-
         #endregion
 
         #endregion
@@ -242,9 +239,9 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
 
         public TextToSpeechViewModel()
         {
+            //  ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
 
             TtsCommand = new DelegateCommand(ExecuteTextToSpeech, CanExecuteTextToSpeech);
-            ReloadComboboxesCommand = new DelegateCommand(ReloadComboboxes);
             SsmlBreakCommand = new DelegateCommand(ExecuteSsmlBreak);
             SsmlEmphasizeCommand = new DelegateCommand<string>(ExecuteSsmlExphasize, CanExecuteSsmlExphasize);
 
@@ -257,6 +254,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             }
             LoadVoiceData().ConfigureAwait(false);
         }
+
 
         #endregion
 
@@ -381,7 +379,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
                 await AppHelper.ShowMessage("Error", ExceptionHelper.ExtractExceptionMessage(e));
             }
 
-            IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(Text);
+            IsTextToSpeechButtonEnabled = !string.IsNullOrWhiteSpace(Text) || !string.IsNullOrWhiteSpace(SSML);
             TtsCommand.RaiseCanExecuteChanged();
         }
 
@@ -424,7 +422,7 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.ViewModels
             else
             {
                 await AppHelper.ShowMessage("Maximum length will be exceeded!", "Cannot insert a new emphasis tag because the length of remaining" +
-                    " characters allowed is less than the number of characters required for emphasis tag.") ;
+                    " characters allowed is less than the number of characters required for emphasis tag.");
             }
         }
         private bool CanExecuteSsmlExphasize(string arg)

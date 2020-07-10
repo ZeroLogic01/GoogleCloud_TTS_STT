@@ -26,17 +26,51 @@
                 <MenuItem Command="ApplicationCommands.Copy" />
                 <MenuItem Command="ApplicationCommands.Cut" />
                 <MenuItem Command="ApplicationCommands.Paste" />
-                <MenuItem  Header="SSML Break" Command="{Binding SsmlBreakCommand}"/>
-                <MenuItem  Header="Emphasize" Command="{Binding SsmlBreakCommand}">
-                    <MenuItem  Header="strong" Command="{Binding SsmlEmphasizeCommand}" CommandParameter="strong"/>
-                    <MenuItem  Header="moderate" Command="{Binding SsmlEmphasizeCommand}" CommandParameter="moderate"/>
-                    <MenuItem  Header="none" Command="{Binding SsmlEmphasizeCommand}" CommandParameter="none"/>
-                    <MenuItem  Header="reduced" Command="{Binding SsmlEmphasizeCommand}" CommandParameter="reduced"/>
+                <MenuItem  Header="SSML Break" Command="{Binding SsmlBreakCommand}" 
+                           InputGestureText="Ctrl+B"/>
+                <MenuItem  Header="Emphasize">
+                    <MenuItem Command="{Binding SsmlEmphasizeCommand}" CommandParameter="strong"
+                              Header="Strong" InputGestureText="Ctrl+Shift+S">
+                        
+                    </MenuItem>
+                    <MenuItem  Command="{Binding SsmlEmphasizeCommand}" CommandParameter="moderate"
+                               Header="Moderate" InputGestureText="Ctrl+Shift+M"/>
+
+                    <MenuItem Command="{Binding SsmlEmphasizeCommand}" CommandParameter="none"
+                              Header="None" InputGestureText="Ctrl+Shift+N"/>
+
+                    <MenuItem  Command="{Binding SsmlEmphasizeCommand}" CommandParameter="reduced"
+                               Header="Reduced" InputGestureText="Ctrl+Shift+R"/>
+
+
                 </MenuItem>
             </ContextMenu>
 
         </ResourceDictionary>
     </UserControl.Resources>
+
+    <UserControl.InputBindings>
+        <KeyBinding Command="{Binding Path=SsmlBreakCommand}" 
+                Key="B" 
+                Modifiers="Control"/>
+        
+        <!--SSML Emphasis Tag command key bindings-->
+        <KeyBinding Command="{Binding Path=SsmlEmphasizeCommand}" 
+                Key="S"
+                Modifiers="Control+Shift" CommandParameter="strong"/>
+        
+        <KeyBinding Command="{Binding Path=SsmlEmphasizeCommand}" 
+                Key="M"
+                Modifiers="Control+Shift" CommandParameter="moderate"/>
+        
+        <KeyBinding Command="{Binding Path=SsmlEmphasizeCommand}" 
+                Key="N"
+                Modifiers="Control+Shift" CommandParameter="none"/>
+        
+        <KeyBinding Command="{Binding Path=SsmlEmphasizeCommand}" 
+                Key="R"
+                Modifiers="Control+Shift" CommandParameter="reduced"/>
+    </UserControl.InputBindings>
 
     <Grid ShowGridLines="False">
         <Grid.RowDefinitions>
@@ -69,7 +103,7 @@
         </Grid>
 
         <TextBox x:Name="TextBox_Text"
-                 Controls:TextBoxHelper.Watermark="Text to speech Text"
+                 Controls:TextBoxHelper.Watermark="Text to speak"
                  Controls:TextBoxHelper.UseFloatingWatermark="True"
                  TextWrapping="Wrap" FlowDirection="LeftToRight" 
                  MaxLength="{x:Static core:AppConstants.MaximumNumberOfTextCharactersAllowed_TTS}"
@@ -90,13 +124,13 @@
         </TextBox>
 
         <TextBox x:Name="TextBox_SSML"
-                 Controls:TextBoxHelper.Watermark="Text to speech SSML"
+                 Controls:TextBoxHelper.Watermark="SSML to speak "
                  Controls:TextBoxHelper.UseFloatingWatermark="True"
                  TextWrapping="Wrap" FlowDirection="LeftToRight" 
                  MaxLength="{x:Static core:AppConstants.MaximumNumberOfSsmlCharactersAllowed_TTS}"
                  Controls:ValidationHelper.ShowValidationErrorOnMouseOver="True"
                  Grid.Row="1" 
-                 Text="{Binding SSML, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                 Text="{Binding SSML, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnDataErrors=True}"
                  core:TextBoxHelper.SelectedText="{Binding SelectedText}"
                  ContextMenu="{StaticResource TextBoxContextMenu}"
                  AcceptsReturn="True"

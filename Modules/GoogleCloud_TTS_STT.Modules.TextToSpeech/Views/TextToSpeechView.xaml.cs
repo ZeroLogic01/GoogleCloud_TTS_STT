@@ -21,8 +21,6 @@ namespace GoogleCloud_TTS_STT.Modules.TextToSpeech.Views
         {
             InitializeComponent();
             eventAggregator.GetEvent<SsmlBreakEvent>().Subscribe(AddSsmlBreak, ThreadOption.PublisherThread, false);
-
-
         }
 
         private async void AddSsmlBreak(string tagContent)
